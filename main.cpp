@@ -38,6 +38,15 @@ int main()
         blockType = blockTypeDecider(blockName);
         //blockTypeCaller(blockType);
     }
+    
+    /////verificare functie postfixat
+    char s[256];
+
+    strcpy(s,"3+2*(1+5)+7");
+
+    ///Ar trebui sa obtin 3215+*+7+
+
+    calcul_expresie_f(s);
 
     return 0;
 }

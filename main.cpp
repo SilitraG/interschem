@@ -7,8 +7,14 @@
 #define DECISION_BLOCK 5
 #define STOP_BLOCK 6
 
+//Sizes
+#define MAX_NUMBER_OF_VARS 50
+#define VAR_NAME_SIZE 30
+#define VAR_EXPRESSION_SIZE 50
+
 #include <iostream>
 
+// Interschem - 18
 // Example video: https://www.youtube.com/watch?v=uxsv5s4Gcw0
 using namespace std;
 
@@ -17,9 +23,9 @@ struct Variables {
     int varsNumber=0; //Total number of variables
     struct Variable {
         //int id;
-        char name[30]; //Variable name
+        char name[VAR_NAME_SIZE]; //Variable name
         long double value; //Variable value
-    }Var[50];
+    }var[MAX_NUMBER_OF_VARS];
 }Vars;
 
 struct LogicBlock {
@@ -27,7 +33,7 @@ struct LogicBlock {
     int typeId=0; //Block type (check def)
     //char typeName[10]=NULL; //Block name
     int varId=-1; //Variable ID for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK
-    char varFullExpression[50]={NULL}; //Full math expression for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK
+    char varFullExpression[VAR_EXPRESSION_SIZE]={NULL}; //Full math expression for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK or DECISION_BLOCK condition
     LogicBlock *next=NULL; //Next block
     LogicBlock *tru=NULL; //Next block if true (for DECISION_BLOCK)
     LogicBlock *fls=NULL; //Next block if false (for DECISION_BLOCK)
@@ -35,8 +41,8 @@ struct LogicBlock {
 
 struct BlocksList {
     int numberOfBlocks = 0;
-    LogicBlock *first; //First block of the code
-    LogicBlock *last; //Last block of the code
+    LogicBlock *first=NULL; //First block of the code
+    LogicBlock *last=NULL; //Last block of the code
 }code;
 
 #include "victor.h"
@@ -45,20 +51,12 @@ struct BlocksList {
 int main()
 {
 ///////////////// TESTE VICTOR /////////////////
-    int blockType = EMPTY_BLOCK;
-    char blockName[10];
 
-    addStartBlock();
+    codeCreator();
+    codeIterator(code.first);
+    varTester();
 
-     /*
-    while(blockType != STOP_BLOCK) {
-        cout << "Introduceti instructiunea: ";
-        cin >> blockName;
-        blockType = blockNameToTypeConverter(blockName);
-        blockTypeLogicCaller(blockType);
-    }
-     */
-     
+
  ///////////////// TESTE FLORIN /////////////////
  /*   /////verificare functie postfixat
     char s[256];
@@ -68,7 +66,7 @@ int main()
     ///Ar trebui sa obtin 3215+*+7+
 
     calcul_expresie_f(s);
-    
+
 */
     return 0;
 }

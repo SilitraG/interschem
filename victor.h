@@ -9,8 +9,8 @@ using namespace std;
 int variableNameToIndex(char name[]) {
     int index = -1;
 
-    for(int i = 1; i <= Vars.varsNumber; i++) {
-        if(strcmp(name, Vars.var[i].name) == 0) {
+    for(int i = 1; i <= code.vars.varsNumber; i++) {
+        if(strcmp(name, code.vars.var[i].name) == 0) {
             index=i;
         }
     }
@@ -32,20 +32,21 @@ void stopBlockLogic(LogicBlock *block) {
 }
 
 void inputBlockLogic(LogicBlock *block) {
-    long double finalValue = stod(block->varFullExpression); //*toDo: change to full expression
+    //long double finalValue = stod(block->varFullExpression); //*toDo: change to full expression
+    long double finalValue = calcul_expresie_f(block->varFullExpression);
 
-    Vars.var[block->varId].value = finalValue;
+    code.vars.var[block->varId].value = finalValue;
 }
 
 void outputBlockLogic(LogicBlock *block) {
-    cout << Vars.var[block->varId].value << ' ';
+    cout << code.vars.var[block->varId].value << ' ';
 
 }
 
 void assignBlockLogic(LogicBlock *block) {
     long double finalValue = stod(block->varFullExpression); //*toDo: change to full expression
 
-    Vars.var[block->varId].value = finalValue;
+    code.vars.var[block->varId].value = finalValue;
 }
 
 bool decisionBlockLogic(LogicBlock *block) {
@@ -86,7 +87,7 @@ void addStopBlock(LogicBlock *& parentBlockPointer) {
 //Create and add an INPUT block to the code list
 void addInputBlock(LogicBlock *& parentBlockPointer) {
     char newVarName[VAR_NAME_SIZE];
-    long double newVarValue; //*toDo: change to full expression
+    char newVarValue[VAR_EXPRESSION_SIZE]; //*toDo: change to full expression
     int newVarId;
     cout << "Introduceti numele variabilei: ";
     cin >> newVarName;
@@ -95,17 +96,17 @@ void addInputBlock(LogicBlock *& parentBlockPointer) {
 
     newVarId = variableNameToIndex(newVarName);
     if(newVarId == -1) {
-        Vars.varsNumber++;
-        newVarId = Vars.varsNumber;
-        strcpy(Vars.var[Vars.varsNumber].name, newVarName);
+        code.vars.varsNumber++;
+        newVarId = code.vars.varsNumber;
+        strcpy(code.vars.var[code.vars.varsNumber].name, newVarName);
     }
 
     LogicBlock *block = new LogicBlock;
     block->typeId = INPUT_BLOCK;
     block->varId = newVarId;
-    char temporaryExpression[50];
-    itoa(newVarValue, temporaryExpression, 10);
-    strcpy(block->varFullExpression, temporaryExpression); //*toDo: change to full expression
+    //char temporaryExpression[50];
+    //itoa(newVarValue, temporaryExpression, 10);
+    strcpy(block->varFullExpression, newVarValue); //*toDo: change to full expression
 
     code.numberOfBlocks++;
     parentBlockPointer = block;
@@ -149,9 +150,9 @@ void addAssignBlock(LogicBlock *& parentBlockPointer) {
 
     int varId = variableNameToIndex(varName);
     if(varId == -1) {
-        Vars.varsNumber++;
-        varId = Vars.varsNumber;
-        strcpy(Vars.var[Vars.varsNumber].name, varName);
+        code.vars.varsNumber++;
+        varId = code.vars.varsNumber;
+        strcpy(code.vars.var[code.vars.varsNumber].name, varName);
     }
 
     LogicBlock *block = new LogicBlock;
@@ -287,8 +288,8 @@ void codeIterator(LogicBlock *block) {
 //Shows the used variables
 void varTester() {
     cout << '\n';
-    for(int i = 1; i <= Vars.varsNumber; i++) {
-        cout << Vars.var[i].name << ' ' << Vars.var[i].value << ' ';
+    for(int i = 1; i <= code.vars.varsNumber; i++) {
+        cout << code.vars.var[i].name << ' ' << code.vars.var[i].value << ' ';
     }
     cout << '\n';
 }

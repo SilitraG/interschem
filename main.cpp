@@ -58,15 +58,22 @@ int main()
 
 
  ///////////////// TESTE FLORIN /////////////////
- /*   /////verificare functie postfixat
+ /*   /////calcul functie postfixat
     char s[256];
-
-    strcpy(s,"3+2*(1+5)+7");
-
-    ///Ar trebui sa obtin 3215+*+7+
-
+    strcpy(s,"30+2*(10+5)+7");
+    ///Ar trebui sa obtin 30215+*+7+
+    ///Valoarea ex fiind 67
     calcul_expresie_f(s);
 
+    ///verificare valoare adevar
+    char exp[256];
+    strcpy(exp, "3 * 3 <= 9 + 1");
+    
+    cout << "\n\n\n";
+    if(valoare_adevar_expresie(exp))
+        cout << "Da";
+    else
+        cout << "Nu";
 */
     return 0;
 }

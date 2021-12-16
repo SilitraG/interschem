@@ -46,6 +46,7 @@ struct BlocksList {
 }code;
 
 #include "victor.h"
+#include "struct.h"
 #include "florin.h"
 
 int main()

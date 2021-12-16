@@ -235,18 +235,17 @@ bool valoare_adevar_expresie(char expresie[])
         }
         i++;
     }
-     cout << stanga<< "!!!!!!!\n";
 
-    char operand[3];
+    char operand[4]="";
     while(strchr("<>=!", expresie[i]) != 0)
     {
         if(expresie[i] != ' ')
         {
             operand[poz_operand] = expresie[i]; ///salvez operandul
+            poz_operand++;
         }
         i++;
     }
-    cout << operand << "@@@@@@@@\n";
 
     while(strchr("<>=!",expresie[i]) == 0)
     {
@@ -257,7 +256,6 @@ bool valoare_adevar_expresie(char expresie[])
         }
         i++;
     }
-    cout << dreapta << "#########\n";
 
     int val_stanga = calcul_expresie_f(stanga); ///atribui valoarea expresiei din sirul stanga
     int val_dreapta = calcul_expresie_f(dreapta);  ///atribui valoarea expresiei din sirul dreapta
@@ -265,7 +263,6 @@ bool valoare_adevar_expresie(char expresie[])
     switch (operand[0])
     {
         case '<':
-            cout << "****";
             if(operand[1] == '=')
             {
                 if(val_stanga <= val_dreapta)
@@ -308,4 +305,3 @@ bool valoare_adevar_expresie(char expresie[])
     }
 
 }
-

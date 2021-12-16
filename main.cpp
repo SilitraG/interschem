@@ -26,7 +26,7 @@ struct Variables {
         char name[VAR_NAME_SIZE]; //Variable name
         long double value; //Variable value
     }var[MAX_NUMBER_OF_VARS];
-}Vars;
+};
 
 struct LogicBlock {
     float xPos, yPos; //Position of the block
@@ -40,41 +40,34 @@ struct LogicBlock {
 };
 
 struct BlocksList {
+    Variables vars;
     int numberOfBlocks = 0;
     LogicBlock *first=NULL; //First block of the code
     LogicBlock *last=NULL; //Last block of the code
 }code;
 
-#include "victor.h"
 #include "struct.h"
 #include "florin.h"
+#include "victor.h"
 
 int main()
 {
 ///////////////// TESTE VICTOR /////////////////
-
     codeCreator();
     codeIterator(code.first);
     varTester();
 
 
  ///////////////// TESTE FLORIN /////////////////
- /*   /////calcul functie postfixat
+ /*   /////verificare functie postfixat
     char s[256];
-    strcpy(s,"30+2*(10+5)+7");
-    ///Ar trebui sa obtin 30215+*+7+
-    ///Valoarea ex fiind 67
+
+    strcpy(s,"3+2*(1+5)+7");
+
+    ///Ar trebui sa obtin 3215+*+7+
+
     calcul_expresie_f(s);
 
-    ///verificare valoare adevar
-    char exp[256];
-    strcpy(exp, "3 * 3 <= 9 + 1");
-    
-    cout << "\n\n\n";
-    if(valoare_adevar_expresie(exp))
-        cout << "Da";
-    else
-        cout << "Nu";
 */
     return 0;
 }

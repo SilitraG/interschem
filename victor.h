@@ -44,13 +44,13 @@ void outputBlockLogic(LogicBlock *block) {
 }
 
 void assignBlockLogic(LogicBlock *block) {
-    long double finalValue = stod(block->varFullExpression); //*toDo: change to full expression
+    long double finalValue = calcul_expresie_f(block->varFullExpression);
 
     code.vars.var[block->varId].value = finalValue;
 }
 
 bool decisionBlockLogic(LogicBlock *block) {
-    bool finalExpressionTruthValue = false; //*toDo: change to full expression
+    bool finalExpressionTruthValue = valoare_adevar_expresie(block->varFullExpression);
     return finalExpressionTruthValue;
 
 }
@@ -87,12 +87,12 @@ void addStopBlock(LogicBlock *& parentBlockPointer) {
 //Create and add an INPUT block to the code list
 void addInputBlock(LogicBlock *& parentBlockPointer) {
     char newVarName[VAR_NAME_SIZE];
-    char newVarValue[VAR_EXPRESSION_SIZE]; //*toDo: change to full expression
+    char newVarExpression[VAR_EXPRESSION_SIZE];
     int newVarId;
     cout << "Introduceti numele variabilei: ";
     cin >> newVarName;
     cout << "Introduceti valoarea: ";
-    cin >> newVarValue; //*toDo: change to full expression
+    cin >> newVarExpression;
 
     newVarId = variableNameToIndex(newVarName);
     if(newVarId == -1) {
@@ -106,7 +106,7 @@ void addInputBlock(LogicBlock *& parentBlockPointer) {
     block->varId = newVarId;
     //char temporaryExpression[50];
     //itoa(newVarValue, temporaryExpression, 10);
-    strcpy(block->varFullExpression, newVarValue); //*toDo: change to full expression
+    strcpy(block->varFullExpression, newVarExpression);
 
     code.numberOfBlocks++;
     parentBlockPointer = block;
@@ -141,12 +141,13 @@ void addOutputBlock(LogicBlock *& parentBlockPointer) {
 //Create and add an ASSIGN block to the code list
 void addAssignBlock(LogicBlock *& parentBlockPointer) {
     char varName[VAR_NAME_SIZE];
-    long double varValue; //*toDo: change to full expression
+    //long double varValue; //*toDo: change to full expression
+    char varExpression[VAR_EXPRESSION_SIZE];
 
     cout << "Introduceti numele variabilei: ";
     cin >> varName;
     cout << "Introduceti valoarea: ";
-    cin >> varValue; //*toDo: change to full expression
+    cin >> varExpression; //*toDo: change to full expression
 
     int varId = variableNameToIndex(varName);
     if(varId == -1) {
@@ -158,9 +159,9 @@ void addAssignBlock(LogicBlock *& parentBlockPointer) {
     LogicBlock *block = new LogicBlock;
     block->typeId = ASSIGN_BLOCK;
     block->varId = varId;
-    char temporaryExpression[50];
-    itoa(varValue, temporaryExpression, 10);
-    strcpy(block->varFullExpression, temporaryExpression); //*toDo: change to full expression
+    //char temporaryExpression[50];
+    //itoa(varValue, temporaryExpression, 10);
+    strcpy(block->varFullExpression, varExpression); //*toDo: change to full expression
 
     code.numberOfBlocks++;
     parentBlockPointer = block;
@@ -294,15 +295,19 @@ void varTester() {
     cout << '\n';
 }
 
+//Console code input
 void codeCreator() {
     int blockType = EMPTY_BLOCK;
     char blockName[10];
+    LogicBlock *lastIf = new LogicBlock;
+    bool precedentWasDecision = false;
 
     while(blockType != STOP_BLOCK) {
         cout << "Introduceti instructiunea: ";
         cin >> blockName;
         blockType = blockNameToTypeConverter(blockName);
         if(blockType == DECISION_BLOCK) {
+            precedentWasDecision = true;
             addBlockCaller(blockType, code.last->next);
             LogicBlock *decisionBlock = new LogicBlock;
             decisionBlock = code.last;
@@ -311,11 +316,13 @@ void codeCreator() {
             if(strcmp(blockName, "stopif")){
                 blockType = blockNameToTypeConverter(blockName);
                 addBlockCaller(blockType, decisionBlock->tru);
+                lastIf = code.last;
                 cout << "IF: Introduceti instructiunea: ";
                 cin >> blockName;
                 while(strcmp(blockName, "stopif")){
                     blockType = blockNameToTypeConverter(blockName);
                     addBlockCaller(blockType, code.last->next);
+                    lastIf = code.last;
                     cout << "IF: Introduceti instructiunea: ";
                     cin >> blockName;
                 }
@@ -337,6 +344,10 @@ void codeCreator() {
             }
         } else {
             addBlockCaller(blockType, code.last->next);
+            if(precedentWasDecision == true) {
+                lastIf->next=code.last;
+                precedentWasDecision = false;
+            }
         }
     }
 }

@@ -19,7 +19,25 @@ int variableNameToIndex(char name[]) {
 
 }
 
-// ----------- BLOCK LOGIC FUNCTIONS -----------
+//Input:  blockId of decision block, T/F path
+//Starts a connection from decision master block
+void startConnectionDecision(int blockId, bool path) {
+    code.appProps.connection.masterBlockId = blockId;
+    code.appProps.connection.path = path;
+
+}
+
+//Input: master blockId
+//Starts a connection
+void startConnection(int blockId) {
+    //cout << "Connection blockId: " << blockId << ' ';
+    if(code.appProps.connection.masterBlockId == false) {
+        code.appProps.connection.masterBlockId = blockId;
+    }
+
+}
+
+/// ----------- BLOCK LOGIC FUNCTIONS -----------
 
 void startBlockLogic(LogicBlock *block) {
     return;
@@ -54,20 +72,19 @@ bool decisionBlockLogic(LogicBlock *block) {
     return finalExpressionTruthValue;
 
 }
-// ----------- END OF BLOCK LOGIC FUNCTIONS -----------
+/// ----------- END OF BLOCK LOGIC FUNCTIONS -----------
 
 
-// ----------- BLOCK ADD FUNCTIONS -----------
+/// ----------- BLOCK ADD FUNCTIONS -----------
 
 //Input: -
 //Create and add a START block to the code list
-void addStartBlock(LogicBlock *& parentBlockPointer) {
-    LogicBlock *block = new LogicBlock;
-    block->typeId = START_BLOCK;
+void addStartBlock(int blockId) {
+    code.numberOfBlocks++;
+    code.allBlocks[blockId]->typeId = START_BLOCK;
 
-    code.numberOfBlocks=1;
-    code.first = block;
-    code.last = block;
+   // code.first = block;
+   // code.last = block;
 }
 
 //Input: "next" pointer of previous block,
@@ -185,7 +202,7 @@ void addDecisionBlock(LogicBlock *& parentBlockPointer) {
     code.last = block;
 
 }
-// ----------- END OF BLOCK ADD FUNCTIONS -----------
+/// ----------- END OF BLOCK ADD FUNCTIONS -----------
 
 // Input: block Name
 // Output: block type Id
@@ -214,7 +231,7 @@ int blockNameToTypeConverter(char blockName[]) {
 
 // Input: block type Id
 // Calls the logic function for the needed block
-void addBlockCaller(int blockType, LogicBlock *& parentBlockPointer) {
+/*void addBlockCaller(int blockType, LogicBlock *& parentBlockPointer) {
     switch (blockType) {
         case START_BLOCK:
             addStartBlock(parentBlockPointer);
@@ -235,10 +252,10 @@ void addBlockCaller(int blockType, LogicBlock *& parentBlockPointer) {
             addStopBlock(parentBlockPointer);
             break;
         default:
-            cout << "Instructiune incorecta\n";
+            cerr << "Instructiune incorecta\n";
     }
 
-}
+} */
 
 //Input: The first block of the list
 //Iterates trough the list and calls the logic functions for each block
@@ -296,7 +313,7 @@ void varTester() {
 }
 
 //Console code input
-void codeCreator() {
+/*void codeCreator() {
     int blockType = EMPTY_BLOCK;
     char blockName[10];
     LogicBlock *lastIf = new LogicBlock;
@@ -350,4 +367,4 @@ void codeCreator() {
             }
         }
     }
-}
+}*/

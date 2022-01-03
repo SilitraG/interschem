@@ -70,7 +70,8 @@ struct LogicBlock {
         int numberOfLinesFls=0; //Total number of lines for false path
         sf::Vertex flsPath[6][2]; //[line number][point of a line(0 or 1)]
     }connectionPath;
-    LogicBlock *prev=NULL; //Previous block
+    int numberOfPrevs=0;
+    LogicBlock *prev[MAX_NUMBER_OF_BLOCKS]={NULL}; //All previous blocks
     LogicBlock *next=NULL; //Next block
     LogicBlock *tru=NULL; //Next block if true (for DECISION_BLOCK)
     LogicBlock *fls=NULL; //Next block if false (for DECISION_BLOCK)

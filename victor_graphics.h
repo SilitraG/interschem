@@ -30,22 +30,24 @@ void deleteBlock(int blockId) {
     code.allBlocks[blockId]->next = NULL;
     code.allBlocks[blockId]->tru = NULL;
     code.allBlocks[blockId]->fls = NULL;
-    if(code.allBlocks[blockId]->prev!=NULL) {
-        if(code.allBlocks[blockId]->prev->typeId == DECISION_BLOCK) {
-            if(code.allBlocks[blockId]->prev->tru == code.allBlocks[blockId]) {
-                code.allBlocks[blockId]->prev->connectionPath.numberOfLinesTru = 0;
+    for(int i = 1; i <= code.allBlocks[blockId]->numberOfPrevs; i++) {
+        if(code.allBlocks[blockId]->prev[i]!=NULL) {
+            if(code.allBlocks[blockId]->prev[i]->typeId == DECISION_BLOCK) {
+                if(code.allBlocks[blockId]->prev[i]->tru == code.allBlocks[blockId]) {
+                    code.allBlocks[blockId]->prev[i]->connectionPath.numberOfLinesTru = 0;
+                } else {
+                    code.allBlocks[blockId]->prev[i]->connectionPath.numberOfLinesFls = 0;
+                }
             } else {
-                code.allBlocks[blockId]->prev->connectionPath.numberOfLinesFls = 0;
+                code.allBlocks[blockId]->prev[i]->connectionPath.numberOfLinesNext = 0;
             }
-        } else {
-            code.allBlocks[blockId]->prev->connectionPath.numberOfLinesNext = 0;
+            if(code.allBlocks[blockId]->prev[i]->connectionPath.numberOfLinesTru == 0 && code.allBlocks[blockId]->prev[i]->connectionPath.numberOfLinesFls == 0 && code.allBlocks[blockId]->prev[i]->connectionPath.numberOfLinesNext == 0) {
+                code.allBlocks[blockId]->prev[i]->connectionPath.hasConnection = false;
+            }
         }
-        if(code.allBlocks[blockId]->prev->connectionPath.numberOfLinesTru == 0 && code.allBlocks[blockId]->prev->connectionPath.numberOfLinesFls == 0 && code.allBlocks[blockId]->prev->connectionPath.numberOfLinesNext == 0) {
-            code.allBlocks[blockId]->prev->connectionPath.hasConnection = false;
-        }
-    }
 
-    code.allBlocks[blockId]->prev = NULL;
+        code.allBlocks[blockId]->prev[i] = NULL;
+    }
 
 }
 
@@ -109,9 +111,19 @@ void drawNewConnection(int slaveBlockId) {
     if(code.allBlocks[masterBlockId]->typeId == DECISION_BLOCK) {
         // Check if master block is already in a connection
         if(code.allBlocks[masterBlockId]->tru != NULL && code.appProps.connection.path == true) {
-          code.allBlocks[masterBlockId]->tru->prev = NULL;
+            for(int i = 1; i <= code.allBlocks[masterBlockId]->tru->numberOfPrevs; i++) {
+                if(code.allBlocks[masterBlockId]->tru->prev[i] == code.allBlocks[masterBlockId]) {
+                    code.allBlocks[masterBlockId]->tru->prev[i] = NULL;
+                    break;
+                }
+            }
         } else if(code.allBlocks[masterBlockId]->fls != NULL && code.appProps.connection.path == false) {
-          code.allBlocks[masterBlockId]->fls->prev = NULL;
+            for(int i = 1; i <= code.allBlocks[masterBlockId]->fls->numberOfPrevs; i++) {
+                if(code.allBlocks[masterBlockId]->fls->prev[i] == code.allBlocks[masterBlockId]) {
+                    code.allBlocks[masterBlockId]->fls->prev[i] = NULL;
+                    break;
+                }
+            }
         }
 
         if(code.appProps.connection.path) {
@@ -128,9 +140,14 @@ void drawNewConnection(int slaveBlockId) {
             code.allBlocks[masterBlockId]->connectionPath.flsPath[code.allBlocks[masterBlockId]->connectionPath.numberOfLinesFls][1] = sf::Vertex(sf::Vector2f(slaveBlockPos.x+BLOCK_SIZE_X/2, slaveBlockPos.y));
         }
     } else {
-        // Check if slave block is already in a connection
+        // Check if master block is already in a connection
         if(code.allBlocks[masterBlockId]->next != NULL) {
-          code.allBlocks[masterBlockId]->next->prev = NULL;
+          for(int i = 1; i <= code.allBlocks[masterBlockId]->next->numberOfPrevs; i++) {
+                if(code.allBlocks[masterBlockId]->next->prev[i] == code.allBlocks[masterBlockId]) {
+                    code.allBlocks[masterBlockId]->next->prev[i] = NULL;
+                    break;
+                }
+            }
         }
 
         code.allBlocks[masterBlockId]->next = code.allBlocks[slaveBlockId];
@@ -141,7 +158,7 @@ void drawNewConnection(int slaveBlockId) {
     }
 
     // Check if slave block is already in a connection
-    if(code.allBlocks[slaveBlockId]->prev != NULL) { ///BUG: Two or more blocks can't point at the same block
+    /*if(code.allBlocks[slaveBlockId]->prev != NULL) { ///BUG: Two or more blocks can't point at the same block (fixed)
         if(code.allBlocks[slaveBlockId]->prev->typeId == DECISION_BLOCK) {
             if(code.allBlocks[slaveBlockId]->prev->tru == code.allBlocks[slaveBlockId]) {
                code.allBlocks[slaveBlockId]->prev->tru = NULL;
@@ -155,7 +172,9 @@ void drawNewConnection(int slaveBlockId) {
             code.allBlocks[slaveBlockId]->prev->connectionPath.numberOfLinesNext = 0;
         }
     }
-    code.allBlocks[slaveBlockId]->prev = code.allBlocks[masterBlockId];
+    */
+    code.allBlocks[slaveBlockId]->numberOfPrevs++; ///To Do: Check if there are any empty prevs
+    code.allBlocks[slaveBlockId]->prev[code.allBlocks[slaveBlockId]->numberOfPrevs] = code.allBlocks[masterBlockId];
 
     code.appProps.connection.masterBlockId = false;
 
@@ -242,15 +261,18 @@ void moveConnections(int blockId) {
         }
     }
 
-    if(code.allBlocks[blockId]->prev!=NULL) {
-        if(code.allBlocks[blockId]->prev->typeId == DECISION_BLOCK) {
-            if(code.allBlocks[blockId]->prev->tru == code.allBlocks[blockId]) {
-                code.allBlocks[blockId]->prev->connectionPath.truPath[1][1] = sf::Vertex(sf::Vector2f(blockPos.x+BLOCK_SIZE_X/2, blockPos.y));
+    for(int i = 1; i <= code.allBlocks[blockId]->numberOfPrevs; i++) {
+        if(code.allBlocks[blockId]->prev[i]!=NULL) {
+            if(code.allBlocks[blockId]->prev[i]->typeId == DECISION_BLOCK) {
+                if(code.allBlocks[blockId]->prev[i]->tru == code.allBlocks[blockId]) {
+                    code.allBlocks[blockId]->prev[i]->connectionPath.truPath[1][1] = sf::Vertex(sf::Vector2f(blockPos.x+BLOCK_SIZE_X/2, blockPos.y));
+                }
+                if(code.allBlocks[blockId]->prev[i]->fls == code.allBlocks[blockId]) {
+                    code.allBlocks[blockId]->prev[i]->connectionPath.flsPath[1][1] = sf::Vertex(sf::Vertex(sf::Vector2f(blockPos.x+BLOCK_SIZE_X/2, blockPos.y)));
+                }
             } else {
-                code.allBlocks[blockId]->prev->connectionPath.flsPath[1][1] = sf::Vertex(sf::Vertex(sf::Vector2f(blockPos.x+BLOCK_SIZE_X/2, blockPos.y)));
+                code.allBlocks[blockId]->prev[i]->connectionPath.nextPath[1][1] = sf::Vertex(sf::Vector2f(blockPos.x+BLOCK_SIZE_X/2, blockPos.y));
             }
-        } else {
-            code.allBlocks[blockId]->prev->connectionPath.nextPath[1][1] = sf::Vertex(sf::Vector2f(blockPos.x+BLOCK_SIZE_X/2, blockPos.y));
         }
     }
 
@@ -351,7 +373,7 @@ void displayConnection(int blockId, sf::RenderWindow &window) {
 
 void displayAllLogicBlocks(sf::RenderWindow &window) {
     for(int i=1; i <= code.numberOfBlocks; i++) {
-        if(code.allBlocks[i]->typeId != 0) {
+        if(code.allBlocks[i]->typeId != EMPTY_BLOCK) {
             window.draw(code.allBlocks[i]->block);
             window.draw(code.allBlocks[i]->blockTitle);
             displayConnection(i, window);

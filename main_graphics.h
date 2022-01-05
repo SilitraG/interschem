@@ -12,13 +12,15 @@ void appWindow()
         cerr << "Font error";
     }
 
+    drawAddBlockMenu(arialMedium);
+
     drawNewBlock(sf::Vector2f(200, 100), START_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(400, 600), STOP_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(500, 500), INPUT_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(200, 400), ASSIGN_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(450, 200), OUTPUT_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(250, 230), DECISION_BLOCK, arialMedium);
-    drawNewBlock(sf::Vector2f(150, 630), STOP_BLOCK, arialMedium);
+    //drawNewBlock(sf::Vector2f(150, 630), STOP_BLOCK, arialMedium);
 
     //cout << code.allBlocks[2]->blockTitle.getLocalBounds().width; //for text centering
 
@@ -44,6 +46,9 @@ void appWindow()
                 switch (event.key.code) {
                 case sf::Mouse::Left:
                     code.appProps.mouseIsPressed = true;
+                    if(mouseIsOnAddBlock() != -1){
+                        addBlockIsPressedHandler(mouseIsOnAddBlock(), arialMedium);
+                    }
                     if(mouseIsOnBlockMenuButton() != -1) {
                         blockMenuButtonIsPressedHandler(mouseIsOnBlockMenuButton());
                     }
@@ -59,6 +64,7 @@ void appWindow()
                 case sf::Mouse::Left:
                     code.appProps.mouseIsPressed = false;
                     code.appProps.block.blockIsBeingMoved = false;
+                    code.appProps.addBlockMenu.blockIsBeingAdded = false;
                     break;
                 case sf::Mouse::Right:
                     code.appProps.blockMenu.blockMenuIsActive = false;
@@ -86,11 +92,11 @@ void appWindow()
                 //rearrangeBlocks(code.appProps.block.blockIsBeingMoved);
             }
         }
-
         code.appProps.mouseIsMoving = false;
         window.clear(sf::Color::WINDOW_COLOR);
 
         /// DRAWING ZONE ///
+        displayAddBlockMenu(window);
         displayAllLogicBlocks(window);
         displayBlockMenu(window);
 

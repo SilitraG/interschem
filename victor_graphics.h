@@ -51,6 +51,39 @@ void deleteBlock(int blockId) {
 
 }
 
+// Draws the "Add Block" menu + the blocks inside it
+void drawAddBlockMenu(sf::Font &textFont) {
+    int noOfDBlocks = 5; // Number of dummy blocks
+    code.appProps.addBlockMenu.addBlockMenuBackground.setPosition(sf::Vector2f(0, ADD_BLOCK_MENU_POS_Y));
+    code.appProps.addBlockMenu.addBlockMenuBackground.setSize(sf::Vector2f(ADD_BLOCK_MENU_SIZE_X, WINDOW_HEIGHT-ADD_BLOCK_MENU_POS_Y));
+    code.appProps.addBlockMenu.addBlockMenuBackground.setFillColor(sf::Color::ADD_BLOCK_MENU_COLOR);
+
+    code.appProps.addBlockMenu.menuTitle.setFont(textFont);
+    code.appProps.addBlockMenu.menuTitle.setString("ADD A BLOCK");
+    code.appProps.addBlockMenu.menuTitle.setCharacterSize(ADD_BLOCK_MENU_TEXT_SIZE);
+    code.appProps.addBlockMenu.menuTitle.setFillColor(sf::Color::ADD_BLOCK_MENU_TEXT_COLOR);
+    code.appProps.addBlockMenu.menuTitle.setPosition(sf::Vector2f((ADD_BLOCK_MENU_SIZE_X-code.appProps.addBlockMenu.menuTitle.getLocalBounds().width)/2, ADD_BLOCK_MENU_POS_Y+(WINDOW_HEIGHT-ADD_BLOCK_MENU_POS_Y-noOfDBlocks*BLOCK_SIZE_Y)/noOfDBlocks*0.3));
+
+    for(int i = 1; i <= noOfDBlocks; i++) {
+        code.appProps.addBlockMenu.dummyBlock[i].setPosition(sf::Vector2f((ADD_BLOCK_MENU_SIZE_X-BLOCK_SIZE_X)/2, ADD_BLOCK_MENU_POS_Y+(WINDOW_HEIGHT-ADD_BLOCK_MENU_POS_Y-noOfDBlocks*BLOCK_SIZE_Y)/noOfDBlocks*i));
+        code.appProps.addBlockMenu.dummyBlock[i].setSize(sf::Vector2f(BLOCK_SIZE_X, BLOCK_SIZE_Y));
+        code.appProps.addBlockMenu.dummyBlock[i].setFillColor(sf::Color::GENERIC_BLOCK_COLOR);
+
+        code.appProps.addBlockMenu.dummyBlockTitle[i].setPosition(sf::Vector2f((ADD_BLOCK_MENU_SIZE_X-BLOCK_SIZE_X)/2, ADD_BLOCK_MENU_POS_Y+(WINDOW_HEIGHT-ADD_BLOCK_MENU_POS_Y-noOfDBlocks*BLOCK_SIZE_Y)/noOfDBlocks*i));
+        code.appProps.addBlockMenu.dummyBlockTitle[i].setCharacterSize(BLOCK_TEXT_SIZE);
+        code.appProps.addBlockMenu.dummyBlockTitle[i].setFillColor(sf::Color::BLOCK_TEXT_COLOR);
+        code.appProps.addBlockMenu.dummyBlockTitle[i].setFont(textFont);
+    }
+    code.appProps.addBlockMenu.dummyBlock[noOfDBlocks].setFillColor(sf::Color::STOP_BLOCK_COLOR);
+
+    code.appProps.addBlockMenu.dummyBlockTitle[1].setString("INPUT");
+    code.appProps.addBlockMenu.dummyBlockTitle[2].setString("OUTPUT");
+    code.appProps.addBlockMenu.dummyBlockTitle[3].setString("ASSIGN");
+    code.appProps.addBlockMenu.dummyBlockTitle[4].setString("DECISION");
+    code.appProps.addBlockMenu.dummyBlockTitle[5].setString("STOP");
+
+}
+
 //Input: blockPosition, blockType
 //Adds a block to the allBlocks array (only the visual part for now)
 void drawNewBlock(sf::Vector2f blockPos, int blockType, sf::Font &textFont) {
@@ -180,6 +213,12 @@ void drawNewConnection(int slaveBlockId) {
 
 }
 
+void addBlockIsPressedHandler(int buttonId, sf::Font &textFont) {
+    drawNewBlock(code.appProps.addBlockMenu.dummyBlock[buttonId].getPosition(), buttonId+1, textFont);
+    code.appProps.addBlockMenu.blockIsBeingAdded = true;
+
+}
+
 void blockMenuButtonIsPressedHandler(int buttonId) {
     int blockType = code.allBlocks[code.appProps.blockMenu.blockMenuIsActive]->typeId;
     string buttonText = code.appProps.blockMenu.menuButtonsTitle[buttonId].getString().toAnsiString();
@@ -202,47 +241,6 @@ void blockMenuButtonIsPressedHandler(int buttonId) {
 
 }
 
-/// /////////// CHECK MOUSE POSITION ////////////////////////
-//Input: item(block, button etc) top left position and size
-//Output: True/False
-bool mouseIsOnItem(sf::Vector2f itemPos, sf::Vector2f itemSize) {
-    if(code.appProps.mousePos.x < itemPos.x || code.appProps.mousePos.y < itemPos.y){
-        return 0;
-    }
-    if(code.appProps.mousePos.x > itemPos.x+itemSize.x || code.appProps.mousePos.y > itemPos.y+itemSize.y) {
-        return 0;
-    }
-    return 1;
-
-}
-
-//Input: -
-//Output: id of the most visible block or -1
-int mouseIsOnBlock() {
-    for(int i=code.numberOfBlocks; i>=1; i--) {
-        if(mouseIsOnItem(code.allBlocks[i]->block.getPosition(), code.allBlocks[i]->block.getSize()) && code.allBlocks[i]->typeId != 0) {
-            return i;
-        }
-    }
-    return -1;
-
-}
-
-//Input: -
-//Output: id of the button or -1(if the menu is inactive or no button is selected)
-int mouseIsOnBlockMenuButton() {
-    if(code.appProps.blockMenu.blockMenuIsActive) {
-        for(int i = 1; i <= code.appProps.blockMenu.numberOfButtons; i++) {
-            if(mouseIsOnItem(code.appProps.blockMenu.menuButtons[i].getPosition(), code.appProps.blockMenu.menuButtons[i].getSize())) {
-                //cout << code.appProps.blockMenu.blockMenuIsActive << ' ' << i << '\n';
-                return i;
-            }
-        }
-    }
-    return -1;
-
-}
-/// /////////// END OF CHECK MOUSE POSITION ////////////////////////
 void moveConnections(int blockId) {
     sf::Vector2f blockPos = code.allBlocks[blockId]->block.getPosition();
 
@@ -279,14 +277,36 @@ void moveConnections(int blockId) {
 }
 
 void moveBlock(int blockId) {
-    if(!code.appProps.block.blockIsBeingMoved) {
-        code.appProps.block.xDif = code.appProps.mousePos.x - code.allBlocks[blockId]->block.getPosition().x;
-        code.appProps.block.yDif = code.appProps.mousePos.y - code.allBlocks[blockId]->block.getPosition().y;
-        code.appProps.block.blockIsBeingMoved = blockId;
+    if(!code.allBlocks[blockId]->block.getGlobalBounds().intersects(code.appProps.addBlockMenu.addBlockMenuBackground.getGlobalBounds())) {
+        if(code.appProps.addBlockMenu.blockIsBeingAdded == true) {
+            code.appProps.addBlockMenu.blockIsBeingAdded = false;
+        } else {
+            if(!code.appProps.block.blockIsBeingMoved) {
+                code.appProps.block.xDif = code.appProps.mousePos.x - code.allBlocks[blockId]->block.getPosition().x;
+                code.appProps.block.yDif = code.appProps.mousePos.y - code.allBlocks[blockId]->block.getPosition().y;
+                code.appProps.block.blockIsBeingMoved = blockId;
+            }
+            code.allBlocks[blockId]->block.setPosition(code.appProps.mousePos.x - code.appProps.block.xDif, code.appProps.mousePos.y - code.appProps.block.yDif);
+            code.allBlocks[blockId]->blockTitle.setPosition(code.appProps.mousePos.x - code.appProps.block.xDif, code.appProps.mousePos.y - code.appProps.block.yDif);
+            moveConnections(blockId);
+        }
     }
-    code.allBlocks[blockId]->block.setPosition(code.appProps.mousePos.x - code.appProps.block.xDif, code.appProps.mousePos.y - code.appProps.block.yDif);
-    code.allBlocks[blockId]->blockTitle.setPosition(code.appProps.mousePos.x - code.appProps.block.xDif, code.appProps.mousePos.y - code.appProps.block.yDif);
-    moveConnections(blockId);
+    if(code.allBlocks[blockId]->block.getGlobalBounds().intersects(code.appProps.addBlockMenu.addBlockMenuBackground.getGlobalBounds()) ){
+        if(code.appProps.addBlockMenu.blockIsBeingAdded == false) {
+            code.allBlocks[blockId]->block.setPosition(sf::Vector2f(ADD_BLOCK_MENU_SIZE_X, code.allBlocks[blockId]->block.getPosition().y));
+            code.allBlocks[blockId]->blockTitle.setPosition(sf::Vector2f(ADD_BLOCK_MENU_SIZE_X, code.allBlocks[blockId]->block.getPosition().y));
+            moveConnections(blockId);
+        } else {
+            if(!code.appProps.block.blockIsBeingMoved) {
+                code.appProps.block.xDif = code.appProps.mousePos.x - code.allBlocks[blockId]->block.getPosition().x;
+                code.appProps.block.yDif = code.appProps.mousePos.y - code.allBlocks[blockId]->block.getPosition().y;
+                code.appProps.block.blockIsBeingMoved = blockId;
+            }
+            code.allBlocks[blockId]->block.setPosition(code.appProps.mousePos.x - code.appProps.block.xDif, code.appProps.mousePos.y - code.appProps.block.yDif);
+            code.allBlocks[blockId]->blockTitle.setPosition(code.appProps.mousePos.x - code.appProps.block.xDif, code.appProps.mousePos.y - code.appProps.block.yDif);
+            moveConnections(blockId);
+        }
+    }
 
 }
 
@@ -352,7 +372,72 @@ void updateBlockMenu(int blockId, sf::Font &textFont) {
 
 }
 
+/// /////////// CHECK MOUSE POSITION ////////////////////////
+//Input: item(block, button etc) top left position and size
+//Output: True/False
+bool mouseIsOnItem(sf::Vector2f itemPos, sf::Vector2f itemSize) {
+    if(code.appProps.mousePos.x < itemPos.x || code.appProps.mousePos.y < itemPos.y){
+        return 0;
+    }
+    if(code.appProps.mousePos.x > itemPos.x+itemSize.x || code.appProps.mousePos.y > itemPos.y+itemSize.y) {
+        return 0;
+    }
+    return 1;
+
+}
+
+//Input: -
+//Output: id of the most visible block or -1
+int mouseIsOnBlock() {
+    for(int i=code.numberOfBlocks; i>=1; i--) {
+        if(mouseIsOnItem(code.allBlocks[i]->block.getPosition(), code.allBlocks[i]->block.getSize()) && code.allBlocks[i]->typeId != 0) {
+            return i;
+        }
+    }
+    return -1;
+
+}
+
+//Input: -
+//Output: id of the button or -1(if the menu is inactive or no button is selected)
+int mouseIsOnBlockMenuButton() {
+    if(code.appProps.blockMenu.blockMenuIsActive) {
+        for(int i = 1; i <= code.appProps.blockMenu.numberOfButtons; i++) {
+            if(mouseIsOnItem(code.appProps.blockMenu.menuButtons[i].getPosition(), code.appProps.blockMenu.menuButtons[i].getSize())) {
+                //cout << code.appProps.blockMenu.blockMenuIsActive << ' ' << i << '\n';
+                return i;
+            }
+        }
+    }
+    return -1;
+
+}
+
+//Input: -
+//Output: id of the dummy block or -1
+int mouseIsOnAddBlock() {
+    if(mouseIsOnItem(code.appProps.addBlockMenu.addBlockMenuBackground.getPosition(), code.appProps.addBlockMenu.addBlockMenuBackground.getSize())) {
+        for(int i = 1; i <= 5; i++) {
+            if(mouseIsOnItem(code.appProps.addBlockMenu.dummyBlock[i].getPosition(), code.appProps.addBlockMenu.dummyBlock[i].getSize())) {
+                return i;
+            }
+        }
+    }
+    return -1;
+
+}
+/// /////////// END OF CHECK MOUSE POSITION ////////////////////////
+
 /// /////////// DISPLAY ////////////////////////
+void displayAddBlockMenu(sf::RenderWindow &window) {
+    window.draw(code.appProps.addBlockMenu.addBlockMenuBackground);
+    window.draw(code.appProps.addBlockMenu.menuTitle);
+    for(int i = 1; i <= 5; i++) {
+        window.draw(code.appProps.addBlockMenu.dummyBlock[i]);
+        window.draw(code.appProps.addBlockMenu.dummyBlockTitle[i]);
+    }
+}
+
 void displayConnection(int blockId, sf::RenderWindow &window) {
     if(code.allBlocks[blockId]->connectionPath.hasConnection) {
         if(code.allBlocks[blockId]->typeId == DECISION_BLOCK) {

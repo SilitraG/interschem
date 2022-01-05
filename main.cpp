@@ -23,6 +23,9 @@
 #define BLOCK_MENU_BUTTON_SIZE_X 150
 #define BLOCK_MENU_BUTTON_SIZE_Y 30
 #define BORDER_THICKNESS 2
+#define ADD_BLOCK_MENU_SIZE_X 140
+#define ADD_BLOCK_MENU_POS_Y 50
+#define ADD_BLOCK_MENU_TEXT_SIZE BLOCK_TEXT_SIZE
 
 //Graphics colors
 #define WINDOW_COLOR Black
@@ -33,6 +36,8 @@
 #define MENU_COLOR Blue
 #define MENU_BUTTON_COLOR White
 #define MENU_BUTTON_TEXT_COLOR Black
+#define ADD_BLOCK_MENU_COLOR Cyan
+#define ADD_BLOCK_MENU_TEXT_COLOR Black
 
 //Text
 #define MENU_BLOCK_CONNECTION "START CONNECTION"
@@ -53,6 +58,16 @@
 // Example video: https://www.youtube.com/watch?v=Hr3xLdh7Tt0
 using namespace std;
 
+struct BlockConnectionPath {
+    bool hasConnection=false; //true if block has atleast one connection
+    int numberOfLinesNext=0; //Total number of lines for next path
+    sf::Vertex nextPath[6][2]; //[line number][point of a line(0 or 1)]
+    int numberOfLinesTru=0; //Total number of lines for true path
+    sf::Vertex truPath[6][2]; //[line number][point of a line(0 or 1)]
+    int numberOfLinesFls=0; //Total number of lines for false path
+    sf::Vertex flsPath[6][2]; //[line number][point of a line(0 or 1)]
+}connectionPath;
+
 struct LogicBlock {
     sf::RectangleShape block; //Visual block
     sf::Text blockTitle; //Visual text inside the block
@@ -61,15 +76,7 @@ struct LogicBlock {
     //char typeName[10]=NULL; //Block name
     int varId=-1; //Variable ID for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK
     char varFullExpression[VAR_EXPRESSION_SIZE]={NULL}; //Full math expression for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK or DECISION_BLOCK condition
-    struct BlockConnectionPath {
-        bool hasConnection=false; //true if block has atleast one connection
-        int numberOfLinesNext=0; //Total number of lines for next path
-        sf::Vertex nextPath[6][2]; //[line number][point of a line(0 or 1)]
-        int numberOfLinesTru=0; //Total number of lines for true path
-        sf::Vertex truPath[6][2]; //[line number][point of a line(0 or 1)]
-        int numberOfLinesFls=0; //Total number of lines for false path
-        sf::Vertex flsPath[6][2]; //[line number][point of a line(0 or 1)]
-    }connectionPath;
+    BlockConnectionPath connectionPath; //All the slave graphical connections
     int numberOfPrevs=0;
     LogicBlock *prev[MAX_NUMBER_OF_BLOCKS]={NULL}; //All previous blocks
     LogicBlock *next=NULL; //Next block
@@ -77,27 +84,42 @@ struct LogicBlock {
     LogicBlock *fls=NULL; //Next block if false (for DECISION_BLOCK)
 };
 
+struct BlockProps {
+    int blockIsBeingMoved=0; //0 if no block is being moved or blockId otherwise
+    float xDif=0; //Distance between mouse and block origin
+    float yDif=0; //Distance between mouse and block origin
+};
+
+struct BlockMenuProps {
+    int blockMenuIsActive=false; // 0 if inactive or blockId otherwise
+    int numberOfButtons=0; //Number of blocks for specific menu
+    sf::Vector2f menuPos; // Position of the menu Background
+    sf::RectangleShape menuBackground;
+    sf::RectangleShape menuButtons[5];
+    sf::Text menuButtonsTitle[5];
+};
+
+struct BlockConnection {
+    int masterBlockId=0; // blockId of the master block or 0 if no connection is being made
+    int slaveBlockId=0; // blockId of the master block or 0 if no connection is being made
+    bool path=false; // T/F path if the master block is DECISION_BLOCK
+};
+
+struct AddBlockMenu {
+    int blockIsBeingAdded=false; // true if a block is in "add mode" or false otherwise
+    sf::RectangleShape addBlockMenuBackground; // Background for the "add block" menu
+    sf::Text menuTitle; // Add Block Menu title
+    sf::RectangleShape dummyBlock[6]; //Dummy visual block (only visual, not movable)
+    sf::Text dummyBlockTitle[6]; //Visual text inside the dummy block
+};
+
 struct WindowProps {
     bool mouseIsPressed=false;
     bool mouseIsMoving=false;
-    struct BlockMenuProps {
-        int blockMenuIsActive=0; // 0 if inactive or blockId otherwise
-        int numberOfButtons=0; //Number of blocks for specific menu
-        sf::Vector2f menuPos; // Position of the menu Background
-        sf::RectangleShape menuBackground;
-        sf::RectangleShape menuButtons[5];
-        sf::Text menuButtonsTitle[5];
-    }blockMenu;
-    struct BlockProps {
-        int blockIsBeingMoved=0; //0 if no block is being moved or blockId otherwise
-        float xDif=0; //Distance between mouse and block origin
-        float yDif=0; //Distance between mouse and block origin
-    }block;
-    struct BlockConnection {
-        int masterBlockId=0; // blockId of the master block or 0 if no connection is being made
-        int slaveBlockId=0; // blockId of the master block or 0 if no connection is being made
-        bool path = false; // T/F path if the master block is DECISION_BLOCK
-    }connection;
+    BlockProps block; //For moving a block
+    BlockMenuProps blockMenu; //For the menu of each block
+    BlockConnection connection; //For making a connection
+    AddBlockMenu addBlockMenu; //For the menu where you can add a new block
     sf::Vector2f mousePos; //Mouse position
 };
 

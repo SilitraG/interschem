@@ -95,6 +95,7 @@ void expresie_postfixata_f(char expresie[], Sir_postfixat postfixat[], int &j)
                 postfixat[j].nume[poz] = expresie[i];      ///mutam valoarea variabilei(insiruirea de cifre intepretate ca si caractere), pe pozitia coresp. in sirul postfixat
                 poz++; i++;
             }
+            postfixat[j].nume[poz] = 0;
             i--;
             j++;   ///actualizam indicele pozitiei pt sirul postfixat
         }
@@ -149,7 +150,6 @@ int calcul_expresie_f(char expresie[])
 
     expresie_postfixata_f(expresie, postfixat, n);          ///formez expresia postfixata ce va contine n 'elemente'
 
-
     for(i = 0; i < n; i++)
     {
         cout << postfixat[i].nume << "-";
@@ -163,6 +163,7 @@ int calcul_expresie_f(char expresie[])
 
 
     Nod_postfixat *stiva = new Nod_postfixat;
+
     int valoare = 0;
     for(i = 0; i < n; i++)
     {
@@ -178,6 +179,7 @@ int calcul_expresie_f(char expresie[])
             int stanga = top_int_f(stiva);
             pop_int_f(stiva);
 
+
             switch (postfixat[i].nume[0])
             {
                 case '+': valoare = stanga + dreapta;
@@ -186,11 +188,28 @@ int calcul_expresie_f(char expresie[])
                     break;
                 case '*': valoare = stanga * dreapta;
                     break;
-                case '/': valoare = stanga / dreapta;
+                case '/':
+                    try{
+                        if(dreapta != 0)
+                        {
+                            valoare = stanga / dreapta;
+                        }
+                        else
+                        {
+                            throw(404);
+                        }
+                    }
+                    catch (int error)
+                    {
+                        cout << "\nDivide by zero error encountered\n";
+                    }
                     break;
+
                 default:
                     break;
             }
+
+
 
             push_int_f(stiva, valoare);
         }
@@ -198,13 +217,20 @@ int calcul_expresie_f(char expresie[])
     valoare = top_int_f(stiva);
     pop_int_f(stiva);
 
-    cout <<"\nValoarea expresiei este:  " <<  valoare <<"\n";
+
+    for(int i = 0; i < n; i++)
+    {
+        while(strlen(postfixat[i].nume) != 0)
+        {
+            strcpy(postfixat[i].nume, postfixat[i].nume + 1); ///eliberarea caracterelor din sirul postfixat
+        }
+    }
 
     return valoare;
 
 }
 
-bool valoare_adevar_expresie(char expresie[])
+int valoare_adevar_expresie(char expresie[])
 {
     char stanga[256]="", dreapta[256]="";
     int i = 0;
@@ -239,9 +265,11 @@ bool valoare_adevar_expresie(char expresie[])
         }
         i++;
     }
-
     int val_stanga = calcul_expresie_f(stanga); ///atribui valoarea expresiei din sirul stanga
     int val_dreapta = calcul_expresie_f(dreapta);  ///atribui valoarea expresiei din sirul dreapta
+
+    if (val_stanga == 404)
+        return 404;
 
     switch (operand[0])
     {

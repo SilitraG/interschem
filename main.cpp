@@ -13,33 +13,28 @@
 #define VAR_EXPRESSION_SIZE 51
 #define MAX_NUMBER_OF_BLOCKS 51
 
-//Graphics sizes
+//Window & app
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
+#define WINDOW_COLOR Black
+
+//Block
 #define BLOCK_SIZE_X 100
 #define BLOCK_SIZE_Y 40
 #define BLOCK_TEXT_SIZE 16
-#define MENU_TEXT_SIZE 13
+#define START_BLOCK_COLOR sf::Color::Red
+#define STOP_BLOCK_COLOR sf::Color::Red
+#define GENERIC_BLOCK_COLOR sf::Color::Red
+#define BLOCK_TEXT_COLOR sf::Color::White
+
+//Block menu
 #define BLOCK_MENU_BUTTON_SIZE_X 150
 #define BLOCK_MENU_BUTTON_SIZE_Y 30
-#define BORDER_THICKNESS 2
-#define ADD_BLOCK_MENU_SIZE_X 140
-#define ADD_BLOCK_MENU_POS_Y 50
-#define ADD_BLOCK_MENU_TEXT_SIZE BLOCK_TEXT_SIZE
-
-//Graphics colors
-#define WINDOW_COLOR Black
-#define START_BLOCK_COLOR Red
-#define STOP_BLOCK_COLOR Red
-#define GENERIC_BLOCK_COLOR Red
-#define BLOCK_TEXT_COLOR White
-#define MENU_COLOR Blue
-#define MENU_BUTTON_COLOR White
-#define MENU_BUTTON_TEXT_COLOR Black
-#define ADD_BLOCK_MENU_COLOR Cyan
-#define ADD_BLOCK_MENU_TEXT_COLOR Black
-
-//Text
+#define BLOCK_MENU_BORDER_THICKNESS 2
+#define MENU_COLOR sf::Color::Blue
+#define MENU_BUTTON_COLOR sf::Color::White
+#define MENU_BUTTON_TEXT_COLOR sf::Color::Black
+#define MENU_TEXT_SIZE 13
 #define MENU_BLOCK_CONNECTION "START CONNECTION"
 #define MENU_BLOCK_T_CONNECTION "START T CONNECTION"
 #define MENU_BLOCK_F_CONNECTION "START F CONNECTION"
@@ -47,6 +42,37 @@
 #define MENU_BLOCK_CHANGE_VARIABLE "SET VARIABLE"
 #define MENU_BLOCK_CHANGE_EXPRESSION "SET EXPRESSION"
 #define MENU_BLOCK_DELETE "DELETE"
+
+//App output
+#define APP_OUTPUT_SIZE_X 350
+#define APP_OUTPUT_SIZE_Y WINDOW_HEIGHT
+#define APP_OUTPUT_POS_X (WINDOW_WIDTH-APP_OUTPUT_SIZE_X)
+#define APP_OUTPUT_POS_Y 0
+#define APP_OUTPUT_BORDER_THICKNESS 4
+#define APP_OUTPUT_COLOR sf::Color(220,220,220)
+#define APP_OUTPUT_BUTTON_COLOR sf::Color::White
+#define APP_OUTPUT_BUTTON_TEXT_COLOR sf::Color::Black
+#define APP_OUTPUT_BUTTON_TEXT_SIZE 15
+#define APP_OUTPUT_RUN_CODE "RUN CODE"
+#define APP_OUTPUT_GENERATE_CODE "GENERATE CODE"
+
+//Block add menu
+#define ADD_BLOCK_MENU_SIZE_X 140
+#define ADD_BLOCK_MENU_POS_X 0
+#define ADD_BLOCK_MENU_POS_Y 0
+#define ADD_BLOCK_MENU_COLOR sf::Color(220,220,220)
+#define ADD_BLOCK_MENU_TEXT_SIZE BLOCK_TEXT_SIZE
+#define ADD_BLOCK_MENU_TEXT_COLOR sf::Color::Black
+#define UNDERLINE_COLOR sf::Color::Black
+
+//App menu
+#define APP_MENU_SIZE_X (WINDOW_WIDTH-APP_OUTPUT_SIZE_X)
+#define APP_MENU_SIZE_Y (50+2*APP_OUTPUT_BORDER_THICKNESS)
+#define APP_MENU_POS_X 0
+#define APP_MENU_POS_Y 0
+#define APP_MENU_COLOR sf::Color(220,220,220)
+#define NUMBER_OF_APP_MENU_BUTTONS 5
+
 
 #include <string>
 #include <iostream>
@@ -111,6 +137,20 @@ struct AddBlockMenu {
     sf::Text menuTitle; // Add Block Menu title
     sf::RectangleShape dummyBlock[6]; //Dummy visual block (only visual, not movable)
     sf::Text dummyBlockTitle[6]; //Visual text inside the dummy block
+    sf::Vertex underline[2];
+};
+
+struct AppMenu {
+    sf::RectangleShape appMenuBackground;
+    sf::RectangleShape appMenuButton[NUMBER_OF_APP_MENU_BUTTONS];
+    sf::Text appMenuButtonText[NUMBER_OF_APP_MENU_BUTTONS];
+};
+
+struct AppOutput {
+    sf::RectangleShape appOutputBackground;
+    sf::RectangleShape appOutputArea;
+    sf::RectangleShape appOutputButton[3];
+    sf::Text appOutputButtonText[3];
 };
 
 struct WindowProps {
@@ -120,6 +160,8 @@ struct WindowProps {
     BlockMenuProps blockMenu; //For the menu of each block
     BlockConnection connection; //For making a connection
     AddBlockMenu addBlockMenu; //For the menu where you can add a new block
+    AppMenu appMenu; //Global menu for the app
+    AppOutput appOutput; //Code output
     sf::Vector2f mousePos; //Mouse position
 };
 

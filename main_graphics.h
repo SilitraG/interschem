@@ -12,6 +12,8 @@ void appWindow()
         cerr << "Font error";
     }
 
+    drawAppMenu(arialMedium);
+    drawAppOutput(arialMedium);
     drawAddBlockMenu(arialMedium);
 
     drawNewBlock(sf::Vector2f(200, 100), START_BLOCK, arialMedium);
@@ -62,6 +64,9 @@ void appWindow()
             case sf::Event::MouseButtonReleased: // Mouse released buttons
                 switch (event.key.code) {
                 case sf::Mouse::Left:
+                    if(mouseIsOnAppOutputButton()) {
+                        appOutputButtonIsPressedHandler(mouseIsOnAppOutputButton());
+                    }
                     code.appProps.mouseIsPressed = false;
                     code.appProps.block.blockIsBeingMoved = false;
                     code.appProps.addBlockMenu.blockIsBeingAdded = false;
@@ -96,6 +101,8 @@ void appWindow()
         window.clear(sf::Color::WINDOW_COLOR);
 
         /// DRAWING ZONE ///
+        displayAppMenu(window);
+        displayAppOutput(window);
         displayAddBlockMenu(window);
         displayAllLogicBlocks(window);
         displayBlockMenu(window);

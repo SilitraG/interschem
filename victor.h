@@ -80,54 +80,48 @@ bool decisionBlockLogic(LogicBlock *block) {
 //Input: -
 //Create and add a START block to the code list
 void addStartBlock(int blockId) {
-    code.numberOfBlocks++;
     code.allBlocks[blockId]->typeId = START_BLOCK;
+    code.first = code.allBlocks[blockId];
 
-   // code.first = block;
-   // code.last = block;
 }
 
-//Input: "next" pointer of previous block,
+//Input:
 //Create and add a STOP block to the code list
-void addStopBlock(LogicBlock *& parentBlockPointer) {
-    LogicBlock *block = new LogicBlock;
-    block->typeId = STOP_BLOCK;
+void addStopBlock(int blockId) {
+    code.allBlocks[blockId]->typeId = STOP_BLOCK;
 
-    code.numberOfBlocks++;
-    parentBlockPointer = block;
-    code.last = block;
     return;
 
 }
 
-//Input: - (not finished)
+//Input:
 //Create and add an INPUT block to the code list
 void addInputBlock(LogicBlock *& parentBlockPointer) {
-    char newVarName[VAR_NAME_SIZE];
-    char newVarExpression[VAR_EXPRESSION_SIZE];
-    int newVarId;
-    cout << "Introduceti numele variabilei: ";
-    cin >> newVarName;
-    cout << "Introduceti valoarea: ";
-    cin >> newVarExpression;
+    //char newVarName[VAR_NAME_SIZE];
+    //char newVarExpression[VAR_EXPRESSION_SIZE];
+    //int newVarId;
+    //cout << "Introduceti numele variabilei: ";
+    //cin >> newVarName;
+    //cout << "Introduceti valoarea: ";
+    //cin >> newVarExpression;
 
-    newVarId = variableNameToIndex(newVarName);
-    if(newVarId == -1) {
-        code.vars.varsNumber++;
-        newVarId = code.vars.varsNumber;
-        strcpy(code.vars.var[code.vars.varsNumber].name, newVarName);
-    }
+    //newVarId = variableNameToIndex(newVarName);
+    //if(newVarId == -1) {
+    //    code.vars.varsNumber++;
+    //    newVarId = code.vars.varsNumber;
+    //    strcpy(code.vars.var[code.vars.varsNumber].name, newVarName);
+    //}
 
-    LogicBlock *block = new LogicBlock;
-    block->typeId = INPUT_BLOCK;
-    block->varId = newVarId;
+    //LogicBlock *block = new LogicBlock;
+    //block->typeId = INPUT_BLOCK;
+    //block->varId = newVarId;
     //char temporaryExpression[50];
     //itoa(newVarValue, temporaryExpression, 10);
-    strcpy(block->varFullExpression, newVarExpression);
+    //strcpy(block->varFullExpression, newVarExpression);
 
-    code.numberOfBlocks++;
-    parentBlockPointer = block;
-    code.last = block;
+    //code.numberOfBlocks++;
+    //parentBlockPointer = block;
+    //code.last = block;
 
 }
 
@@ -229,6 +223,25 @@ int blockNameToTypeConverter(char blockName[]) {
 
 }
 
+string blockTypeToString(int blockType) {
+    switch (blockType) {
+        case START_BLOCK:
+            return "START";
+        case INPUT_BLOCK:
+            return "INPUT";
+        case OUTPUT_BLOCK:
+            return "OUTPUT";
+        case ASSIGN_BLOCK:
+            return "ASSIGN";
+        case DECISION_BLOCK:
+            return "DECISION";
+        case STOP_BLOCK:
+            return "STOP";
+        default:
+            cerr << "Instructiune incorecta\n";
+    }
+}
+
 // Input: block type Id
 // Calls the logic function for the needed block
 /*void addBlockCaller(int blockType, LogicBlock *& parentBlockPointer) {
@@ -260,47 +273,55 @@ int blockNameToTypeConverter(char blockName[]) {
 //Input: The first block of the list
 //Iterates trough the list and calls the logic functions for each block
 void codeIterator(LogicBlock *block) {
-    while(block != NULL){
+    //while(block != NULL){
+    if(block != NULL){
         switch (block->typeId) {
             case START_BLOCK:
                 cout << "start ";
-                startBlockLogic(block);
-                block=block->next;
+                //startBlockLogic(block);
+                //block=block->next;
                 break;
             case INPUT_BLOCK:
                 cout << "input ";
-                inputBlockLogic(block);
-                block=block->next;
+                //inputBlockLogic(block);
+                //block=block->next;
                 break;
             case OUTPUT_BLOCK:
                 cout << "output ";
-                outputBlockLogic(block);
-                block=block->next;
+                //outputBlockLogic(block);
+                //block=block->next;
                 break;
             case ASSIGN_BLOCK:
                 cout << "assign ";
-                assignBlockLogic(block);
-                block=block->next;
+                //assignBlockLogic(block);
+                //block=block->next;
                 break;
             case DECISION_BLOCK: {
                 cout << "decision ";
-                bool truthValue = decisionBlockLogic(block);
-                if(truthValue) {
-                    block=block->tru;
-                } else {
-                    block=block->fls;
-                }
+                bool truthValue = true;//decisionBlockLogic(block);
+                //if(truthValue) {
+                //    block=block->tru;
+                //} else {
+                //    block=block->fls;
+                //}
                 break;
             }
             case STOP_BLOCK:
                 cout << "stop ";
-                stopBlockLogic(block);
-                block=block->next;
+                //stopBlockLogic(block);
+                //block=block->next;
                 break;
             default:
                 cerr << "Instructiune incorecta\n";
         }
+        if(block->typeId == DECISION_BLOCK) {
+            codeIterator(block->tru);
+            codeIterator(block->fls);
+        } else {
+            codeIterator(block->next);
+        }
     }
+    //cout << '\n';
 }
 
 //Shows the used variables

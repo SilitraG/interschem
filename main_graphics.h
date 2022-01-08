@@ -12,17 +12,17 @@ void appWindow()
         cerr << "Font error";
     }
 
-    drawAppMenu(arialMedium);
-    drawAppOutput(arialMedium);
-    drawAddBlockMenu(arialMedium);
-
     drawNewBlock(sf::Vector2f(200, 100), START_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(400, 600), STOP_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(500, 500), INPUT_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(200, 400), ASSIGN_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(450, 200), OUTPUT_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(250, 230), DECISION_BLOCK, arialMedium);
-    //drawNewBlock(sf::Vector2f(150, 630), STOP_BLOCK, arialMedium);
+
+    drawAppMenu(arialMedium);
+    drawAppOutput(arialMedium);
+    drawAddBlockMenu(arialMedium);
+    //updateUserInputScreen(6, arialMedium);
 
     //cout << code.allBlocks[2]->blockTitle.getLocalBounds().width; //for text centering
 
@@ -41,6 +41,12 @@ void appWindow()
                 case sf::Keyboard::Escape:
                     window.close();
                     break;
+                }
+                break;
+
+            case sf::Event::TextEntered: // Keyboard text
+                if(code.appProps.userInput.inputIsActive && code.appProps.userInput.activeField) {
+                    updateUserInputString(event.text.unicode);
                 }
                 break;
 
@@ -64,7 +70,7 @@ void appWindow()
             case sf::Event::MouseButtonReleased: // Mouse released buttons
                 switch (event.key.code) {
                 case sf::Mouse::Left:
-                    if(mouseIsOnAppOutputButton()) {
+                    if(mouseIsOnAppOutputButton() != -1) {
                         appOutputButtonIsPressedHandler(mouseIsOnAppOutputButton());
                     }
                     code.appProps.mouseIsPressed = false;
@@ -106,6 +112,7 @@ void appWindow()
         displayAddBlockMenu(window);
         displayAllLogicBlocks(window);
         displayBlockMenu(window);
+        displayUserInput(window);
 
         /// END OF DRAWING ZONE ///
 

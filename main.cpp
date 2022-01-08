@@ -12,6 +12,8 @@
 #define VAR_NAME_SIZE 31
 #define VAR_EXPRESSION_SIZE 51
 #define MAX_NUMBER_OF_BLOCKS 51
+#define MAX_NUMBER_OF_CODE_LINE 200
+#define MAX_LINE_OF_CODE_SIZE 255
 
 //Window & app
 #define WINDOW_WIDTH 1280
@@ -229,16 +231,37 @@ int main()
     //varTester();
     appWindow();
 
- ///////////////// TESTE FLORIN /////////////////
- /*   /////verificare functie postfixat
+     ///////////////// TESTE FLORIN /////////////////
+     ///////////////// TESTE FLORIN /////////////////
+    /////verificare functie postfixat
+    /*
     char s[256];
 
-    strcpy(s,"3+2*(1+5)+7");
+    strcpy(s,"30+2*(10+5)+7");
 
     ///Ar trebui sa obtin 3215+*+7+
 
-    calcul_expresie_f(s);
+    int val = calcul_expresie_f(s);
 
-*/
+    cout << val;
+    cout << "\n\n";
+
+    strcpy(s, "30 / 3 == 5 * 2");
+
+    if(valoare_adevar_expresie(s))
+    {
+        cout << "Adevarat";
+    }
+    else
+    {
+        cout << "True";
+    }
+
+
+    cout << "\n\n";
+    char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE];
+    int code_line_size = 0;
+    output_code(code.first, code.vars, code_text, code_line_size);
+    */
     return 0;
 }

@@ -190,50 +190,51 @@ void drawAddBlockMenu(sf::Font &textFont) {
 //Adds a block to the allBlocks array (only the visual part for now)
 void drawNewBlock(sf::Vector2f blockPos, int blockType, sf::Font &textFont) {
     code.numberOfBlocks++;
-    code.allBlocks[code.numberOfBlocks] = new LogicBlock;
-    code.allBlocks[code.numberOfBlocks]->blockPos = blockPos;
-    code.allBlocks[code.numberOfBlocks]->block.setPosition(code.allBlocks[code.numberOfBlocks]->blockPos);
-    code.allBlocks[code.numberOfBlocks]->block.setSize(sf::Vector2f(BLOCK_SIZE_X, BLOCK_SIZE_Y));
+    int blockId = code.numberOfBlocks;
+    code.allBlocks[blockId] = new LogicBlock;
+    code.allBlocks[blockId]->blockPos = blockPos;
+    code.allBlocks[blockId]->block.setPosition(code.allBlocks[blockId]->blockPos);
+    code.allBlocks[blockId]->block.setSize(sf::Vector2f(BLOCK_SIZE_X, BLOCK_SIZE_Y));
     if(blockType == START_BLOCK) {
-        code.allBlocks[code.numberOfBlocks]->block.setFillColor(START_BLOCK_COLOR);
+        code.allBlocks[blockId]->block.setFillColor(START_BLOCK_COLOR);
     } else if(blockType == STOP_BLOCK) {
-        code.allBlocks[code.numberOfBlocks]->block.setFillColor(STOP_BLOCK_COLOR);
+        code.allBlocks[blockId]->block.setFillColor(STOP_BLOCK_COLOR);
     } else {
-        code.allBlocks[code.numberOfBlocks]->block.setFillColor(GENERIC_BLOCK_COLOR);
+        code.allBlocks[blockId]->block.setFillColor(GENERIC_BLOCK_COLOR);
     }
 
-    code.allBlocks[code.numberOfBlocks]->blockTitle.setFont(textFont);
+    code.allBlocks[blockId]->blockTitle.setFont(textFont);
     switch (blockType) {
         case START_BLOCK:
-            code.allBlocks[code.numberOfBlocks]->blockTitle.setString("START");
-            code.allBlocks[code.numberOfBlocks]->typeId = START_BLOCK;
+            code.allBlocks[blockId]->blockTitle.setString("START");
+            addStartBlock(blockId);
             break;
         case INPUT_BLOCK:
-            code.allBlocks[code.numberOfBlocks]->blockTitle.setString("INPUT");
-            code.allBlocks[code.numberOfBlocks]->typeId = INPUT_BLOCK;
+            code.allBlocks[blockId]->blockTitle.setString("INPUT");
+            code.allBlocks[blockId]->typeId = INPUT_BLOCK;
             break;
         case OUTPUT_BLOCK:
-            code.allBlocks[code.numberOfBlocks]->blockTitle.setString("OUTPUT");
-            code.allBlocks[code.numberOfBlocks]->typeId = OUTPUT_BLOCK;
+            code.allBlocks[blockId]->blockTitle.setString("OUTPUT");
+            code.allBlocks[blockId]->typeId = OUTPUT_BLOCK;
             break;
         case ASSIGN_BLOCK:
-            code.allBlocks[code.numberOfBlocks]->blockTitle.setString("ASSIGN");
-            code.allBlocks[code.numberOfBlocks]->typeId = ASSIGN_BLOCK;
+            code.allBlocks[blockId]->blockTitle.setString("ASSIGN");
+            code.allBlocks[blockId]->typeId = ASSIGN_BLOCK;
             break;
         case DECISION_BLOCK:
-            code.allBlocks[code.numberOfBlocks]->blockTitle.setString("DECISION");
-            code.allBlocks[code.numberOfBlocks]->typeId = DECISION_BLOCK;
+            code.allBlocks[blockId]->blockTitle.setString("DECISION");
+            code.allBlocks[blockId]->typeId = DECISION_BLOCK;
             break;
         case STOP_BLOCK:
-            code.allBlocks[code.numberOfBlocks]->blockTitle.setString("STOP");
-            code.allBlocks[code.numberOfBlocks]->typeId = STOP_BLOCK;
+            code.allBlocks[blockId]->blockTitle.setString("STOP");
+            code.allBlocks[blockId]->typeId = STOP_BLOCK;
             break;
         default:
             cerr << "Instructiune incorecta(drawNewBlock)\n";
     }
-    code.allBlocks[code.numberOfBlocks]->blockTitle.setCharacterSize(BLOCK_TEXT_SIZE);
-    code.allBlocks[code.numberOfBlocks]->blockTitle.setFillColor(BLOCK_TEXT_COLOR);
-    code.allBlocks[code.numberOfBlocks]->blockTitle.setPosition(blockPos);
+    code.allBlocks[blockId]->blockTitle.setCharacterSize(BLOCK_TEXT_SIZE);
+    code.allBlocks[blockId]->blockTitle.setFillColor(BLOCK_TEXT_COLOR);
+    code.allBlocks[blockId]->blockTitle.setPosition(blockPos);
 
 }
 
@@ -345,7 +346,8 @@ void blockMenuButtonIsPressedHandler(int buttonId) {
 
 void appOutputButtonIsPressedHandler(int buttonId) {
     if(buttonId == 1) {
-        cout << "run ";
+        codeIterator(code.first);
+        cout << '\n';
     } else {
         cout << "generate ";
     }
@@ -456,7 +458,7 @@ void moveBlock(int blockId) {
 void updateBlockMenu(int blockId, sf::Font &textFont) {
     code.appProps.blockMenu.blockMenuIsActive = blockId;
     code.appProps.blockMenu.menuPos = code.appProps.mousePos;
-    if(code.appProps.connection.masterBlockId == 0) {
+    if(code.appProps.connection.masterBlockId == false) {
         code.appProps.blockMenu.menuButtonsTitle[1].setString(MENU_BLOCK_CONNECTION);
     } else {
         code.appProps.blockMenu.menuButtonsTitle[1].setString(MENU_BLOCK_FINISH_CONNECTION);
@@ -490,7 +492,11 @@ void updateBlockMenu(int blockId, sf::Font &textFont) {
             }
             break;
         case STOP_BLOCK:
-            code.appProps.blockMenu.numberOfButtons = 2;
+            if(code.appProps.connection.masterBlockId == false) {
+                code.appProps.blockMenu.numberOfButtons = 1;
+            } else {
+                code.appProps.blockMenu.numberOfButtons = 2;
+            }
             break;
         default:
             cerr << "Instructiune incorecta(updateBlockMenu)\n";
@@ -514,6 +520,86 @@ void updateBlockMenu(int blockId, sf::Font &textFont) {
         code.appProps.blockMenu.menuButtonsTitle[i].setCharacterSize(MENU_TEXT_SIZE);
         code.appProps.blockMenu.menuButtonsTitle[i].setFillColor(MENU_BUTTON_TEXT_COLOR);
     }
+
+}
+
+void updateUserInputScreen (int blockId, sf::Font &textFont) {
+    code.appProps.userInput.inputIsActive = blockId;
+    code.appProps.userInput.numberOfFields = 2;
+    if(code.allBlocks[blockId]->typeId == DECISION_BLOCK || code.allBlocks[blockId]->typeId == OUTPUT_BLOCK) {
+        code.appProps.userInput.numberOfFields = 1;
+    }
+
+    code.appProps.userInput.userInputBackground.setPosition(sf::Vector2f(USER_INPUT_POS_X, USER_INPUT_POS_Y));
+    code.appProps.userInput.userInputBackground.setSize(sf::Vector2f(USER_INPUT_SIZE_X, USER_INPUT_SIZE_Y));
+    code.appProps.userInput.userInputBackground.setFillColor(USER_INPUT_BACKGROUND_COLOR);
+    code.appProps.userInput.userInputBackground.setOutlineThickness(USER_INPUT_BACKGROUND_BORDER_THICKNESS);
+    code.appProps.userInput.userInputBackground.setOutlineColor(USER_INPUT_BACKGROUND_BORDER_COLOR);
+
+    code.appProps.userInput.userInputTitle.setPosition(sf::Vector2f(USER_INPUT_POS_X, USER_INPUT_POS_Y));
+    code.appProps.userInput.userInputTitle.setString(blockTypeToString(code.allBlocks[blockId]->typeId));
+    code.appProps.userInput.userInputTitle.setFont(textFont);
+    code.appProps.userInput.userInputTitle.setCharacterSize(20);
+    code.appProps.userInput.userInputTitle.setStyle(sf::Text::Bold);
+    code.appProps.userInput.userInputTitle.setFillColor(sf::Color::Black);
+
+    for(int i = 1; i <= code.appProps.userInput.numberOfFields; i++) {
+        code.appProps.userInput.fieldTitle[i].setPosition(sf::Vector2f(USER_INPUT_FIELD_TITLE_X, USER_INPUT_POS_Y+80*i+10+(code.appProps.userInput.numberOfFields==1?40:0)));
+        code.appProps.userInput.fieldTitle[i].setFont(textFont);
+        code.appProps.userInput.fieldTitle[i].setCharacterSize(15);
+        code.appProps.userInput.fieldTitle[i].setStyle(sf::Text::Bold);
+        code.appProps.userInput.fieldTitle[i].setFillColor(sf::Color::Black);
+
+        code.appProps.userInput.userInputField[i].setPosition(sf::Vector2f(USER_INPUT_FIELD_POS_X, code.appProps.userInput.fieldTitle[i].getPosition().y-10));
+        code.appProps.userInput.userInputField[i].setSize(sf::Vector2f(USER_INPUT_FIELD_SIZE_X, USER_INPUT_FIELD_SIZE_Y));
+        code.appProps.userInput.userInputField[i].setFillColor(sf::Color::White);
+        code.appProps.userInput.userInputField[i].setOutlineThickness(USER_INPUT_BACKGROUND_BORDER_THICKNESS);
+        code.appProps.userInput.userInputField[i].setOutlineColor(USER_INPUT_BACKGROUND_BORDER_COLOR);
+
+        code.appProps.userInput.userInputText[i].setPosition(sf::Vector2f(USER_INPUT_FIELD_POS_X, code.appProps.userInput.fieldTitle[i].getPosition().y-2));
+        code.appProps.userInput.userInputText[i].setFont(textFont);
+        code.appProps.userInput.userInputText[i].setCharacterSize(20);
+        code.appProps.userInput.userInputText[i].setFillColor(sf::Color::Black);
+    }
+
+    if(code.allBlocks[blockId]->typeId == DECISION_BLOCK) {
+        code.appProps.userInput.fieldTitle[1].setString("SET CONDITION:");
+    } else {
+        code.appProps.userInput.fieldTitle[1].setString("VARIABLE NAME:");
+        code.appProps.userInput.fieldTitle[2].setString("VARIABLE VALUE:");
+    }
+
+    for(int i = 1; i <= 2; i++) {
+        code.appProps.userInput.userInputButton[i].setSize(sf::Vector2f(USER_INPUT_BUTTON_SIZE_X, USER_INPUT_BUTTON_SIZE_Y));
+        code.appProps.userInput.userInputButton[i].setPosition(sf::Vector2f(USER_INPUT_POS_X+(USER_INPUT_SIZE_X-2*USER_INPUT_BUTTON_SIZE_X-200)/2+(200+USER_INPUT_BUTTON_SIZE_X)*(i-1),USER_INPUT_BUTTON_POS_Y));
+        code.appProps.userInput.userInputButton[i].setOutlineThickness(USER_INPUT_BACKGROUND_BORDER_THICKNESS);
+        code.appProps.userInput.userInputButton[i].setOutlineColor(USER_INPUT_BACKGROUND_BORDER_COLOR);
+
+        code.appProps.userInput.userInputButtonText[i].setPosition(code.appProps.userInput.userInputButton[i].getPosition());
+        code.appProps.userInput.userInputButtonText[i].setFont(textFont);
+        code.appProps.userInput.userInputButtonText[i].setCharacterSize(15);
+        code.appProps.userInput.userInputButtonText[i].setStyle(sf::Text::Bold);
+        code.appProps.userInput.userInputButtonText[i].setFillColor(sf::Color::Black);
+    }
+
+    code.appProps.userInput.userInputButtonText[1].setString("CANCEL");
+    code.appProps.userInput.userInputButtonText[2].setString("SUBMIT");
+
+}
+
+void updateUserInputString (char userChar) {
+    int activeField = code.appProps.userInput.activeField;
+    if((int)userChar == 8 && code.appProps.userInput.userInputString[activeField].getSize() != 0) {
+        code.appProps.userInput.userInputString[activeField].erase(code.appProps.userInput.userInputString[activeField].getSize() - 1, 1);
+    } else if((int)userChar != 8){
+        code.appProps.userInput.userInputString[activeField] += userChar;
+    }
+    code.appProps.userInput.userInputText[activeField].setString(code.appProps.userInput.userInputString[activeField]);
+
+    ///TESTS
+    char test[101];
+    strcpy(test, code.appProps.userInput.userInputString[activeField].toAnsiString().c_str());
+    cout <<test << ' ';
 
 }
 
@@ -580,6 +666,23 @@ void displayBlockMenu(sf::RenderWindow &window) {
         }
     }
 
+}
+
+void displayUserInput(sf::RenderWindow &window) {
+    if(code.appProps.userInput.inputIsActive) {
+        window.draw(code.appProps.userInput.userInputBackground);
+        window.draw(code.appProps.userInput.userInputTitle);
+        for(int i = 1; i <= code.appProps.userInput.numberOfFields; i++) {
+            window.draw(code.appProps.userInput.userInputField[i]);
+            window.draw(code.appProps.userInput.fieldTitle[i]);
+            window.draw(code.appProps.userInput.userInputText[i]);
+        }
+
+        for(int i = 1; i <= 2; i++) {
+            window.draw(code.appProps.userInput.userInputButton[i]);
+            window.draw(code.appProps.userInput.userInputButtonText[i]);
+        }
+    }
 }
 
 /// /////////// END OF DISPLAY ////////////////////////

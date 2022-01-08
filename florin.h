@@ -316,3 +316,54 @@ int valoare_adevar_expresie(char expresie[])
     }
 
 }
+
+void output_code(LogicBlock *first_block, Variables vars, char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int &code_line_size)
+{
+    /*
+    EMPTY_BLOCK 0
+    START_BLOCK 1
+    INPUT_BLOCK 2  ///  cin >> n
+    OUTPUT_BLOCK 3 ///  cout << n;
+    ASSIGN_BLOCK 4  ///  n = 3 + 3
+    DECISION_BLOCK 5 ///  if else
+    STOP_BLOCK 6   ///  return
+    */
+
+    code_line_size = 0;
+    strcpy(code_text[code_line_size++],"#include <iostream>");
+    strcpy(code_text[code_line_size++],"#include <math.h>");
+    strcpy(code_text[code_line_size++],"using namespace std;");
+    strcpy(code_text[code_line_size++],"int main()");
+    strcpy(code_text[code_line_size++],"{");
+    strcpy(code_text[code_line_size++],"\tint ");
+
+    LogicBlock *step = first_block;
+
+    for(int i = 0; i < vars.varsNumber; i++)
+    {
+        strcat(code_text[code_line_size], " ");
+        strcat(code_text[code_line_size], vars.var[step->varId].name);
+
+    }
+
+    strcpy(code_text[code_line_size++], "\treturn 0;");
+    strcpy(code_text[code_line_size++], "}");
+
+    ///verificare
+    cout <<"\n\nSource Code: \n\n";
+    for(int i = 0; i < code_line_size; i++)
+    {
+        cout << code_text[i] << "\n";
+    }
+
+    if(step->typeId == 5)
+    {
+        if(step->tru)
+            step = step->tru;
+        else
+            step = step->fls;
+    }
+    else
+        first_block = first_block->next;
+
+}

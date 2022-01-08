@@ -49,7 +49,7 @@
 #define APP_OUTPUT_POS_X (WINDOW_WIDTH-APP_OUTPUT_SIZE_X)
 #define APP_OUTPUT_POS_Y 0
 #define APP_OUTPUT_BORDER_THICKNESS 4
-#define APP_OUTPUT_COLOR sf::Color(220,220,220)
+#define APP_OUTPUT_COLOR sf::Color(169,169,169)
 #define APP_OUTPUT_BUTTON_COLOR sf::Color::White
 #define APP_OUTPUT_BUTTON_TEXT_COLOR sf::Color::Black
 #define APP_OUTPUT_BUTTON_TEXT_SIZE 15
@@ -60,7 +60,7 @@
 #define ADD_BLOCK_MENU_SIZE_X 140
 #define ADD_BLOCK_MENU_POS_X 0
 #define ADD_BLOCK_MENU_POS_Y 0
-#define ADD_BLOCK_MENU_COLOR sf::Color(220,220,220)
+#define ADD_BLOCK_MENU_COLOR sf::Color(169,169,169)
 #define ADD_BLOCK_MENU_TEXT_SIZE BLOCK_TEXT_SIZE
 #define ADD_BLOCK_MENU_TEXT_COLOR sf::Color::Black
 #define UNDERLINE_COLOR sf::Color::Black
@@ -70,8 +70,24 @@
 #define APP_MENU_SIZE_Y (50+2*APP_OUTPUT_BORDER_THICKNESS)
 #define APP_MENU_POS_X 0
 #define APP_MENU_POS_Y 0
-#define APP_MENU_COLOR sf::Color(220,220,220)
+#define APP_MENU_COLOR sf::Color(169,169,169)
 #define NUMBER_OF_APP_MENU_BUTTONS 5
+
+//User input
+#define USER_INPUT_SIZE_X 600
+#define USER_INPUT_SIZE_Y 300
+#define USER_INPUT_POS_X (ADD_BLOCK_MENU_SIZE_X+(WINDOW_WIDTH-APP_OUTPUT_SIZE_X-USER_INPUT_SIZE_X-ADD_BLOCK_MENU_SIZE_X)/2)
+#define USER_INPUT_POS_Y ((WINDOW_HEIGHT-USER_INPUT_SIZE_Y)/2)
+#define USER_INPUT_BACKGROUND_COLOR sf::Color::White
+#define USER_INPUT_BACKGROUND_BORDER_COLOR sf::Color(169,169,169)
+#define USER_INPUT_BACKGROUND_BORDER_THICKNESS 4
+#define USER_INPUT_FIELD_SIZE_X 350
+#define USER_INPUT_FIELD_SIZE_Y 40
+#define USER_INPUT_FIELD_POS_X (USER_INPUT_POS_X+200)
+#define USER_INPUT_FIELD_TITLE_X (USER_INPUT_POS_X+30)
+#define USER_INPUT_BUTTON_SIZE_X 130
+#define USER_INPUT_BUTTON_SIZE_Y 50
+#define USER_INPUT_BUTTON_POS_Y (USER_INPUT_POS_Y+USER_INPUT_SIZE_Y-70)
 
 
 #include <string>
@@ -92,7 +108,7 @@ struct BlockConnectionPath {
     sf::Vertex truPath[6][2]; //[line number][point of a line(0 or 1)]
     int numberOfLinesFls=0; //Total number of lines for false path
     sf::Vertex flsPath[6][2]; //[line number][point of a line(0 or 1)]
-}connectionPath;
+};
 
 struct LogicBlock {
     sf::RectangleShape block; //Visual block
@@ -153,6 +169,20 @@ struct AppOutput {
     sf::Text appOutputButtonText[3];
 };
 
+struct UserInput {
+    int inputIsActive=false; ///CHANGE // id of the block or false
+    int activeField=false; ///CHANGE // id of the active input field or false
+    int numberOfFields=0;
+    sf::RectangleShape userInputBackground;
+    sf::Text userInputTitle;
+    sf::RectangleShape userInputField[3];
+    sf::Text userInputText[3];
+    sf::Text fieldTitle[3];
+    sf::String userInputString[3];
+    sf::RectangleShape userInputButton[3];
+    sf::Text userInputButtonText[3];
+};
+
 struct WindowProps {
     bool mouseIsPressed=false;
     bool mouseIsMoving=false;
@@ -162,6 +192,7 @@ struct WindowProps {
     AddBlockMenu addBlockMenu; //For the menu where you can add a new block
     AppMenu appMenu; //Global menu for the app
     AppOutput appOutput; //Code output
+    UserInput userInput;
     sf::Vector2f mousePos; //Mouse position
 };
 

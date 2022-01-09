@@ -19,6 +19,17 @@ int variableNameToIndex(char name[]) {
 
 }
 
+//Input: variable name
+//Output: id of the variable
+int addVariable(char varName[]) {
+    if(variableNameToIndex(varName) != -1) {
+        return variableNameToIndex(varName);
+    }
+    code.vars.varsNumber++;
+    strcpy(code.vars.var[code.vars.varsNumber].name, varName);
+    return code.vars.varsNumber;
+}
+
 //Input:  blockId of decision block, T/F path
 //Starts a connection from decision master block
 void startConnectionDecision(int blockId, bool path) {

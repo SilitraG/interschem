@@ -64,6 +64,32 @@ int mouseIsOnAddBlock() {
     return -1;
 
 }
+
+//Input: -
+//Output: id of the button or -1(if no button is selected)
+int mouseIsOnUserInputButton() {
+    for(int i = 1; i <= 2; i++) {
+        if(mouseIsOnItem(code.appProps.userInput.userInputButton[i].getPosition(), code.appProps.userInput.userInputButton[i].getSize())) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+//Input: -
+//Output: id of the button or -1(if no button is selected)
+int mouseIsOnUserInputField() {
+    if(code.appProps.userInput.inputIsActive) {
+        for(int i = 1; i <= 2; i++) {
+            if(mouseIsOnItem(code.appProps.userInput.userInputField[i].getPosition(), code.appProps.userInput.userInputField[i].getSize())) {
+                return i;
+            }
+        }
+    }
+    return -1;
+
+}
+
 /// /////////// END OF CHECK MOUSE POSITION ////////////////////////
 
 //Input: blockId
@@ -316,13 +342,186 @@ void drawNewConnection(int slaveBlockId) {
 
 }
 
+void updateBlockMenu(int blockId, sf::Font &textFont) {
+    code.appProps.blockMenu.blockMenuIsActive = blockId;
+    code.appProps.blockMenu.menuPos = code.appProps.mousePos;
+    if(code.appProps.connection.masterBlockId == false) {
+        code.appProps.blockMenu.menuButtonsTitle[1].setString(MENU_BLOCK_CONNECTION);
+    } else {
+        code.appProps.blockMenu.menuButtonsTitle[1].setString(MENU_BLOCK_FINISH_CONNECTION);
+    }
+    switch (code.allBlocks[blockId]->typeId) {
+        case START_BLOCK:
+            code.appProps.blockMenu.numberOfButtons = 1;
+            break;
+        case INPUT_BLOCK:
+            code.appProps.blockMenu.numberOfButtons = 3;
+            code.appProps.blockMenu.menuButtonsTitle[2].setString(MENU_BLOCK_CHANGE_EXPRESSION);
+            break;
+        case OUTPUT_BLOCK:
+            code.appProps.blockMenu.numberOfButtons = 3;
+            code.appProps.blockMenu.menuButtonsTitle[2].setString(MENU_BLOCK_CHANGE_VARIABLE);
+            break;
+        case ASSIGN_BLOCK:
+            code.appProps.blockMenu.numberOfButtons = 3;
+            code.appProps.blockMenu.menuButtonsTitle[2].setString(MENU_BLOCK_CHANGE_EXPRESSION);
+            break;
+        case DECISION_BLOCK:
+            if(code.appProps.connection.masterBlockId == 0) {
+                code.appProps.blockMenu.numberOfButtons = 4;
+                code.appProps.blockMenu.menuButtonsTitle[1].setString(MENU_BLOCK_T_CONNECTION);
+                code.appProps.blockMenu.menuButtonsTitle[2].setString(MENU_BLOCK_F_CONNECTION);
+                code.appProps.blockMenu.menuButtonsTitle[3].setString(MENU_BLOCK_CHANGE_EXPRESSION);
+            } else {
+                code.appProps.blockMenu.numberOfButtons = 3;
+                code.appProps.blockMenu.menuButtonsTitle[1].setString(MENU_BLOCK_FINISH_CONNECTION);
+                code.appProps.blockMenu.menuButtonsTitle[2].setString(MENU_BLOCK_CHANGE_EXPRESSION);
+            }
+            break;
+        case STOP_BLOCK:
+            if(code.appProps.connection.masterBlockId == false) {
+                code.appProps.blockMenu.numberOfButtons = 1;
+            } else {
+                code.appProps.blockMenu.numberOfButtons = 2;
+            }
+            break;
+        default:
+            cerr << "Instructiune incorecta(updateBlockMenu)\n";
+    }
+    if(code.allBlocks[blockId]->typeId != START_BLOCK) {
+        code.appProps.blockMenu.menuButtonsTitle[code.appProps.blockMenu.numberOfButtons].setString(MENU_BLOCK_DELETE);
+    }
+
+    code.appProps.blockMenu.menuBackground.setPosition(code.appProps.blockMenu.menuPos);
+    code.appProps.blockMenu.menuBackground.setSize(sf::Vector2f(BLOCK_MENU_BUTTON_SIZE_X+2*BLOCK_MENU_BORDER_THICKNESS, BLOCK_MENU_BORDER_THICKNESS+(BLOCK_MENU_BUTTON_SIZE_Y+BLOCK_MENU_BORDER_THICKNESS)*code.appProps.blockMenu.numberOfButtons));
+    code.appProps.blockMenu.menuBackground.setFillColor(MENU_COLOR);
+
+    for(int i = 1; i <= code.appProps.blockMenu.numberOfButtons; i++) {
+        //xMenuPos+border, yMenuPos+border+(buttonSize+border)*how many buttons were before
+        code.appProps.blockMenu.menuButtons[i].setPosition(sf::Vector2f(code.appProps.blockMenu.menuPos.x+BLOCK_MENU_BORDER_THICKNESS, code.appProps.blockMenu.menuPos.y+BLOCK_MENU_BORDER_THICKNESS+(BLOCK_MENU_BUTTON_SIZE_Y+BLOCK_MENU_BORDER_THICKNESS)*(i-1)));
+        code.appProps.blockMenu.menuButtons[i].setSize(sf::Vector2f(BLOCK_MENU_BUTTON_SIZE_X, BLOCK_MENU_BUTTON_SIZE_Y));
+        code.appProps.blockMenu.menuButtons[i].setFillColor(MENU_BUTTON_COLOR);
+
+        code.appProps.blockMenu.menuButtonsTitle[i].setFont(textFont);
+        code.appProps.blockMenu.menuButtonsTitle[i].setPosition(sf::Vector2f(code.appProps.blockMenu.menuPos.x+BLOCK_MENU_BORDER_THICKNESS, code.appProps.blockMenu.menuPos.y+BLOCK_MENU_BORDER_THICKNESS+(BLOCK_MENU_BUTTON_SIZE_Y+BLOCK_MENU_BORDER_THICKNESS)*(i-1)));
+        code.appProps.blockMenu.menuButtonsTitle[i].setCharacterSize(MENU_TEXT_SIZE);
+        code.appProps.blockMenu.menuButtonsTitle[i].setFillColor(MENU_BUTTON_TEXT_COLOR);
+    }
+
+}
+
+void updateUserInputScreen (int blockId, sf::Font &textFont) {
+    code.appProps.userInput.inputIsActive = blockId;
+    code.appProps.userInput.activeField = 1;
+    code.appProps.userInput.numberOfFields = 2;
+    if(code.allBlocks[blockId]->typeId == DECISION_BLOCK || code.allBlocks[blockId]->typeId == OUTPUT_BLOCK) {
+        code.appProps.userInput.numberOfFields = 1;
+    }
+
+    code.appProps.userInput.userInputBackground.setPosition(sf::Vector2f(USER_INPUT_POS_X, USER_INPUT_POS_Y));
+    code.appProps.userInput.userInputBackground.setSize(sf::Vector2f(USER_INPUT_SIZE_X, USER_INPUT_SIZE_Y));
+    code.appProps.userInput.userInputBackground.setFillColor(USER_INPUT_BACKGROUND_COLOR);
+    code.appProps.userInput.userInputBackground.setOutlineThickness(USER_INPUT_BACKGROUND_BORDER_THICKNESS);
+    code.appProps.userInput.userInputBackground.setOutlineColor(USER_INPUT_BACKGROUND_BORDER_COLOR);
+
+    code.appProps.userInput.userInputTitle.setPosition(sf::Vector2f(USER_INPUT_POS_X, USER_INPUT_POS_Y));
+    code.appProps.userInput.userInputTitle.setString(blockTypeToString(code.allBlocks[blockId]->typeId));
+    code.appProps.userInput.userInputTitle.setFont(textFont);
+    code.appProps.userInput.userInputTitle.setCharacterSize(20);
+    code.appProps.userInput.userInputTitle.setStyle(sf::Text::Bold);
+    code.appProps.userInput.userInputTitle.setFillColor(sf::Color::Black);
+
+    for(int i = 1; i <= code.appProps.userInput.numberOfFields; i++) {
+        code.appProps.userInput.fieldTitle[i].setPosition(sf::Vector2f(USER_INPUT_FIELD_TITLE_X, USER_INPUT_POS_Y+80*i+10+(code.appProps.userInput.numberOfFields==1?40:0)));
+        code.appProps.userInput.fieldTitle[i].setFont(textFont);
+        code.appProps.userInput.fieldTitle[i].setCharacterSize(15);
+        code.appProps.userInput.fieldTitle[i].setStyle(sf::Text::Bold);
+        code.appProps.userInput.fieldTitle[i].setFillColor(sf::Color::Black);
+
+        code.appProps.userInput.userInputField[i].setPosition(sf::Vector2f(USER_INPUT_FIELD_POS_X, code.appProps.userInput.fieldTitle[i].getPosition().y-10));
+        code.appProps.userInput.userInputField[i].setSize(sf::Vector2f(USER_INPUT_FIELD_SIZE_X, USER_INPUT_FIELD_SIZE_Y));
+        code.appProps.userInput.userInputField[i].setFillColor(sf::Color::White);
+        code.appProps.userInput.userInputField[i].setOutlineThickness(USER_INPUT_BACKGROUND_BORDER_THICKNESS);
+        code.appProps.userInput.userInputField[i].setOutlineColor(USER_INPUT_BACKGROUND_BORDER_COLOR);
+
+        code.appProps.userInput.userInputText[i].setPosition(sf::Vector2f(USER_INPUT_FIELD_POS_X, code.appProps.userInput.fieldTitle[i].getPosition().y-2));
+        code.appProps.userInput.userInputText[i].setFont(textFont);
+        code.appProps.userInput.userInputText[i].setCharacterSize(20);
+        code.appProps.userInput.userInputText[i].setFillColor(sf::Color::Black);
+    }
+
+    int blockType = code.allBlocks[blockId]->typeId;
+    if(blockType == DECISION_BLOCK) {
+        code.appProps.userInput.fieldTitle[1].setString("SET CONDITION:");
+
+        code.appProps.userInput.userInputText[1].setString(code.allBlocks[blockId]->varFullExpression);
+        code.appProps.userInput.userInputString[1] = code.allBlocks[blockId]->varFullExpression;
+    } else {
+        if(blockType == INPUT_BLOCK || blockType == ASSIGN_BLOCK) {
+            code.appProps.userInput.fieldTitle[1].setString("VARIABLE NAME:");
+            code.appProps.userInput.fieldTitle[2].setString("VARIABLE VALUE:");
+
+            if(code.allBlocks[blockId]->varId != -1) {
+                char varName[VAR_NAME_SIZE];
+                strcpy(varName, code.vars.var[code.allBlocks[blockId]->varId].name);
+                code.appProps.userInput.userInputText[1].setString(varName);
+                strcpy(varName, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
+            }
+        } else if(blockType == OUTPUT_BLOCK) {
+            code.appProps.userInput.fieldTitle[1].setString("VARIABLE NAME:");
+
+            if(code.allBlocks[blockId]->varId != -1) {
+                char varName[VAR_NAME_SIZE];
+                strcpy(varName, code.vars.var[code.allBlocks[blockId]->varId].name);
+                code.appProps.userInput.userInputText[1].setString(varName);
+                strcpy(varName, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
+            }
+            code.appProps.userInput.userInputText[2].setString(code.allBlocks[blockId]->varFullExpression);
+            code.appProps.userInput.userInputString[2] = code.allBlocks[blockId]->varFullExpression;
+        }
+    }
+
+    for(int i = 1; i <= 2; i++) {
+        code.appProps.userInput.userInputButton[i].setSize(sf::Vector2f(USER_INPUT_BUTTON_SIZE_X, USER_INPUT_BUTTON_SIZE_Y));
+        code.appProps.userInput.userInputButton[i].setPosition(sf::Vector2f(USER_INPUT_POS_X+(USER_INPUT_SIZE_X-2*USER_INPUT_BUTTON_SIZE_X-200)/2+(200+USER_INPUT_BUTTON_SIZE_X)*(i-1),USER_INPUT_BUTTON_POS_Y));
+        code.appProps.userInput.userInputButton[i].setOutlineThickness(USER_INPUT_BACKGROUND_BORDER_THICKNESS);
+        code.appProps.userInput.userInputButton[i].setOutlineColor(USER_INPUT_BACKGROUND_BORDER_COLOR);
+
+        code.appProps.userInput.userInputButtonText[i].setPosition(code.appProps.userInput.userInputButton[i].getPosition());
+        code.appProps.userInput.userInputButtonText[i].setFont(textFont);
+        code.appProps.userInput.userInputButtonText[i].setCharacterSize(15);
+        code.appProps.userInput.userInputButtonText[i].setStyle(sf::Text::Bold);
+        code.appProps.userInput.userInputButtonText[i].setFillColor(sf::Color::Black);
+    }
+
+    code.appProps.userInput.userInputButtonText[1].setString("CANCEL");
+    code.appProps.userInput.userInputButtonText[2].setString("SUBMIT");
+
+}
+
+void updateUserInputString (char userChar) {
+    int activeField = code.appProps.userInput.activeField;
+    if((int)userChar == 8 && code.appProps.userInput.userInputString[activeField].getSize() != 0) {
+        code.appProps.userInput.userInputString[activeField].erase(code.appProps.userInput.userInputString[activeField].getSize() - 1, 1);
+    } else if((int)userChar != 8){
+        code.appProps.userInput.userInputString[activeField] += userChar;
+    }
+    code.appProps.userInput.userInputText[activeField].setString(code.appProps.userInput.userInputString[activeField]);
+
+    ///TESTS
+    //char test[101];
+    //strcpy(test, code.appProps.userInput.userInputString[activeField].toAnsiString().c_str());
+    //cout <<test << ' ';
+
+}
+
 void addBlockIsPressedHandler(int buttonId, sf::Font &textFont) {
     drawNewBlock(code.appProps.addBlockMenu.dummyBlock[buttonId].getPosition(), buttonId+1, textFont);
     code.appProps.addBlockMenu.blockIsBeingAdded = true;
 
 }
 
-void blockMenuButtonIsPressedHandler(int buttonId) {
+void blockMenuButtonIsPressedHandler(int buttonId, sf::Font &textFont) {
     int blockType = code.allBlocks[code.appProps.blockMenu.blockMenuIsActive]->typeId;
     string buttonText = code.appProps.blockMenu.menuButtonsTitle[buttonId].getString().toAnsiString();
     //cout << buttonText.compare(MENU_BLOCK_CONNECTION) << '\n';
@@ -335,22 +534,53 @@ void blockMenuButtonIsPressedHandler(int buttonId) {
     } else if(buttonText.compare(MENU_BLOCK_FINISH_CONNECTION) == 0) {
         drawNewConnection(code.appProps.blockMenu.blockMenuIsActive);
     } else if(buttonText.compare(MENU_BLOCK_CHANGE_VARIABLE) == 0) {
-
+        updateUserInputScreen(code.appProps.blockMenu.blockMenuIsActive, textFont);
     } else if(buttonText.compare(MENU_BLOCK_CHANGE_EXPRESSION) == 0) {
-
+        updateUserInputScreen(code.appProps.blockMenu.blockMenuIsActive, textFont);
     } else if(buttonText.compare(MENU_BLOCK_DELETE) == 0) {
         deleteBlock(code.appProps.blockMenu.blockMenuIsActive);
     }
+    code.appProps.blockMenu.blockMenuIsActive = false;
 
 }
 
 void appOutputButtonIsPressedHandler(int buttonId) {
-    if(buttonId == 1) {
+    if(buttonId == 1) { // Run Code Button
         codeIterator(code.first);
         cout << '\n';
-    } else {
+    } else { // Generate Code Button
+
         cout << "generate ";
     }
+}
+
+void userInputButtonIsPressedHandler(int buttonId) {
+    int blockId = code.appProps.userInput.inputIsActive;
+    int blockType = code.allBlocks[blockId]->typeId;
+    int varId;
+    char varName[VAR_NAME_SIZE];
+    if(buttonId == 1) {
+
+    } else {
+        if(blockType == INPUT_BLOCK || blockType == ASSIGN_BLOCK) {
+            strcpy(varName, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
+            varId = addVariable(varName);
+            code.allBlocks[blockId]->varId = varId;
+            strcpy(code.allBlocks[blockId]->varFullExpression, code.appProps.userInput.userInputString[2].toAnsiString().c_str());
+        } else if(blockType == OUTPUT_BLOCK) {
+            strcpy(varName, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
+            varId = addVariable(varName);
+            code.allBlocks[blockId]->varId = varId;
+        } else if(blockType == DECISION_BLOCK) {
+            strcpy(code.allBlocks[blockId]->varFullExpression, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
+        }
+    }
+    code.appProps.userInput.userInputString[1].clear();
+    code.appProps.userInput.userInputString[2].clear();
+    code.appProps.userInput.userInputText[1].setString("");
+    code.appProps.userInput.userInputText[2].setString("");
+    code.appProps.userInput.inputIsActive = false;
+
 }
 
 void moveConnections(int blockId) {
@@ -452,154 +682,6 @@ void moveBlock(int blockId) {
             blockBounds = code.allBlocks[blockId]->block.getGlobalBounds();
         }
     }
-
-}
-
-void updateBlockMenu(int blockId, sf::Font &textFont) {
-    code.appProps.blockMenu.blockMenuIsActive = blockId;
-    code.appProps.blockMenu.menuPos = code.appProps.mousePos;
-    if(code.appProps.connection.masterBlockId == false) {
-        code.appProps.blockMenu.menuButtonsTitle[1].setString(MENU_BLOCK_CONNECTION);
-    } else {
-        code.appProps.blockMenu.menuButtonsTitle[1].setString(MENU_BLOCK_FINISH_CONNECTION);
-    }
-    switch (code.allBlocks[blockId]->typeId) {
-        case START_BLOCK:
-            code.appProps.blockMenu.numberOfButtons = 1;
-            break;
-        case INPUT_BLOCK:
-            code.appProps.blockMenu.numberOfButtons = 3;
-            code.appProps.blockMenu.menuButtonsTitle[2].setString(MENU_BLOCK_CHANGE_EXPRESSION);
-            break;
-        case OUTPUT_BLOCK:
-            code.appProps.blockMenu.numberOfButtons = 3;
-            code.appProps.blockMenu.menuButtonsTitle[2].setString(MENU_BLOCK_CHANGE_VARIABLE);
-            break;
-        case ASSIGN_BLOCK:
-            code.appProps.blockMenu.numberOfButtons = 3;
-            code.appProps.blockMenu.menuButtonsTitle[2].setString(MENU_BLOCK_CHANGE_EXPRESSION);
-            break;
-        case DECISION_BLOCK:
-            if(code.appProps.connection.masterBlockId == 0) {
-                code.appProps.blockMenu.numberOfButtons = 4;
-                code.appProps.blockMenu.menuButtonsTitle[1].setString(MENU_BLOCK_T_CONNECTION);
-                code.appProps.blockMenu.menuButtonsTitle[2].setString(MENU_BLOCK_F_CONNECTION);
-                code.appProps.blockMenu.menuButtonsTitle[3].setString(MENU_BLOCK_CHANGE_EXPRESSION);
-            } else {
-                code.appProps.blockMenu.numberOfButtons = 3;
-                code.appProps.blockMenu.menuButtonsTitle[1].setString(MENU_BLOCK_FINISH_CONNECTION);
-                code.appProps.blockMenu.menuButtonsTitle[2].setString(MENU_BLOCK_CHANGE_EXPRESSION);
-            }
-            break;
-        case STOP_BLOCK:
-            if(code.appProps.connection.masterBlockId == false) {
-                code.appProps.blockMenu.numberOfButtons = 1;
-            } else {
-                code.appProps.blockMenu.numberOfButtons = 2;
-            }
-            break;
-        default:
-            cerr << "Instructiune incorecta(updateBlockMenu)\n";
-    }
-    if(code.allBlocks[blockId]->typeId != START_BLOCK) {
-        code.appProps.blockMenu.menuButtonsTitle[code.appProps.blockMenu.numberOfButtons].setString(MENU_BLOCK_DELETE);
-    }
-
-    code.appProps.blockMenu.menuBackground.setPosition(code.appProps.blockMenu.menuPos);
-    code.appProps.blockMenu.menuBackground.setSize(sf::Vector2f(BLOCK_MENU_BUTTON_SIZE_X+2*BLOCK_MENU_BORDER_THICKNESS, BLOCK_MENU_BORDER_THICKNESS+(BLOCK_MENU_BUTTON_SIZE_Y+BLOCK_MENU_BORDER_THICKNESS)*code.appProps.blockMenu.numberOfButtons));
-    code.appProps.blockMenu.menuBackground.setFillColor(MENU_COLOR);
-
-    for(int i = 1; i <= code.appProps.blockMenu.numberOfButtons; i++) {
-        //xMenuPos+border, yMenuPos+border+(buttonSize+border)*how many buttons were before
-        code.appProps.blockMenu.menuButtons[i].setPosition(sf::Vector2f(code.appProps.blockMenu.menuPos.x+BLOCK_MENU_BORDER_THICKNESS, code.appProps.blockMenu.menuPos.y+BLOCK_MENU_BORDER_THICKNESS+(BLOCK_MENU_BUTTON_SIZE_Y+BLOCK_MENU_BORDER_THICKNESS)*(i-1)));
-        code.appProps.blockMenu.menuButtons[i].setSize(sf::Vector2f(BLOCK_MENU_BUTTON_SIZE_X, BLOCK_MENU_BUTTON_SIZE_Y));
-        code.appProps.blockMenu.menuButtons[i].setFillColor(MENU_BUTTON_COLOR);
-
-        code.appProps.blockMenu.menuButtonsTitle[i].setFont(textFont);
-        code.appProps.blockMenu.menuButtonsTitle[i].setPosition(sf::Vector2f(code.appProps.blockMenu.menuPos.x+BLOCK_MENU_BORDER_THICKNESS, code.appProps.blockMenu.menuPos.y+BLOCK_MENU_BORDER_THICKNESS+(BLOCK_MENU_BUTTON_SIZE_Y+BLOCK_MENU_BORDER_THICKNESS)*(i-1)));
-        code.appProps.blockMenu.menuButtonsTitle[i].setCharacterSize(MENU_TEXT_SIZE);
-        code.appProps.blockMenu.menuButtonsTitle[i].setFillColor(MENU_BUTTON_TEXT_COLOR);
-    }
-
-}
-
-void updateUserInputScreen (int blockId, sf::Font &textFont) {
-    code.appProps.userInput.inputIsActive = blockId;
-    code.appProps.userInput.numberOfFields = 2;
-    if(code.allBlocks[blockId]->typeId == DECISION_BLOCK || code.allBlocks[blockId]->typeId == OUTPUT_BLOCK) {
-        code.appProps.userInput.numberOfFields = 1;
-    }
-
-    code.appProps.userInput.userInputBackground.setPosition(sf::Vector2f(USER_INPUT_POS_X, USER_INPUT_POS_Y));
-    code.appProps.userInput.userInputBackground.setSize(sf::Vector2f(USER_INPUT_SIZE_X, USER_INPUT_SIZE_Y));
-    code.appProps.userInput.userInputBackground.setFillColor(USER_INPUT_BACKGROUND_COLOR);
-    code.appProps.userInput.userInputBackground.setOutlineThickness(USER_INPUT_BACKGROUND_BORDER_THICKNESS);
-    code.appProps.userInput.userInputBackground.setOutlineColor(USER_INPUT_BACKGROUND_BORDER_COLOR);
-
-    code.appProps.userInput.userInputTitle.setPosition(sf::Vector2f(USER_INPUT_POS_X, USER_INPUT_POS_Y));
-    code.appProps.userInput.userInputTitle.setString(blockTypeToString(code.allBlocks[blockId]->typeId));
-    code.appProps.userInput.userInputTitle.setFont(textFont);
-    code.appProps.userInput.userInputTitle.setCharacterSize(20);
-    code.appProps.userInput.userInputTitle.setStyle(sf::Text::Bold);
-    code.appProps.userInput.userInputTitle.setFillColor(sf::Color::Black);
-
-    for(int i = 1; i <= code.appProps.userInput.numberOfFields; i++) {
-        code.appProps.userInput.fieldTitle[i].setPosition(sf::Vector2f(USER_INPUT_FIELD_TITLE_X, USER_INPUT_POS_Y+80*i+10+(code.appProps.userInput.numberOfFields==1?40:0)));
-        code.appProps.userInput.fieldTitle[i].setFont(textFont);
-        code.appProps.userInput.fieldTitle[i].setCharacterSize(15);
-        code.appProps.userInput.fieldTitle[i].setStyle(sf::Text::Bold);
-        code.appProps.userInput.fieldTitle[i].setFillColor(sf::Color::Black);
-
-        code.appProps.userInput.userInputField[i].setPosition(sf::Vector2f(USER_INPUT_FIELD_POS_X, code.appProps.userInput.fieldTitle[i].getPosition().y-10));
-        code.appProps.userInput.userInputField[i].setSize(sf::Vector2f(USER_INPUT_FIELD_SIZE_X, USER_INPUT_FIELD_SIZE_Y));
-        code.appProps.userInput.userInputField[i].setFillColor(sf::Color::White);
-        code.appProps.userInput.userInputField[i].setOutlineThickness(USER_INPUT_BACKGROUND_BORDER_THICKNESS);
-        code.appProps.userInput.userInputField[i].setOutlineColor(USER_INPUT_BACKGROUND_BORDER_COLOR);
-
-        code.appProps.userInput.userInputText[i].setPosition(sf::Vector2f(USER_INPUT_FIELD_POS_X, code.appProps.userInput.fieldTitle[i].getPosition().y-2));
-        code.appProps.userInput.userInputText[i].setFont(textFont);
-        code.appProps.userInput.userInputText[i].setCharacterSize(20);
-        code.appProps.userInput.userInputText[i].setFillColor(sf::Color::Black);
-    }
-
-    if(code.allBlocks[blockId]->typeId == DECISION_BLOCK) {
-        code.appProps.userInput.fieldTitle[1].setString("SET CONDITION:");
-    } else {
-        code.appProps.userInput.fieldTitle[1].setString("VARIABLE NAME:");
-        code.appProps.userInput.fieldTitle[2].setString("VARIABLE VALUE:");
-    }
-
-    for(int i = 1; i <= 2; i++) {
-        code.appProps.userInput.userInputButton[i].setSize(sf::Vector2f(USER_INPUT_BUTTON_SIZE_X, USER_INPUT_BUTTON_SIZE_Y));
-        code.appProps.userInput.userInputButton[i].setPosition(sf::Vector2f(USER_INPUT_POS_X+(USER_INPUT_SIZE_X-2*USER_INPUT_BUTTON_SIZE_X-200)/2+(200+USER_INPUT_BUTTON_SIZE_X)*(i-1),USER_INPUT_BUTTON_POS_Y));
-        code.appProps.userInput.userInputButton[i].setOutlineThickness(USER_INPUT_BACKGROUND_BORDER_THICKNESS);
-        code.appProps.userInput.userInputButton[i].setOutlineColor(USER_INPUT_BACKGROUND_BORDER_COLOR);
-
-        code.appProps.userInput.userInputButtonText[i].setPosition(code.appProps.userInput.userInputButton[i].getPosition());
-        code.appProps.userInput.userInputButtonText[i].setFont(textFont);
-        code.appProps.userInput.userInputButtonText[i].setCharacterSize(15);
-        code.appProps.userInput.userInputButtonText[i].setStyle(sf::Text::Bold);
-        code.appProps.userInput.userInputButtonText[i].setFillColor(sf::Color::Black);
-    }
-
-    code.appProps.userInput.userInputButtonText[1].setString("CANCEL");
-    code.appProps.userInput.userInputButtonText[2].setString("SUBMIT");
-
-}
-
-void updateUserInputString (char userChar) {
-    int activeField = code.appProps.userInput.activeField;
-    if((int)userChar == 8 && code.appProps.userInput.userInputString[activeField].getSize() != 0) {
-        code.appProps.userInput.userInputString[activeField].erase(code.appProps.userInput.userInputString[activeField].getSize() - 1, 1);
-    } else if((int)userChar != 8){
-        code.appProps.userInput.userInputString[activeField] += userChar;
-    }
-    code.appProps.userInput.userInputText[activeField].setString(code.appProps.userInput.userInputString[activeField]);
-
-    ///TESTS
-    char test[101];
-    strcpy(test, code.appProps.userInput.userInputString[activeField].toAnsiString().c_str());
-    cout <<test << ' ';
 
 }
 

@@ -117,7 +117,6 @@ struct LogicBlock {
     sf::Text blockTitle; //Visual text inside the block
     sf::Vector2f blockPos; //Position of the block
     int typeId=EMPTY_BLOCK; //Block type (check def)
-    //char typeName[10]=NULL; //Block name
     int varId=-1; //Variable ID for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK
     char varFullExpression[VAR_EXPRESSION_SIZE]={NULL}; //Full math expression for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK or DECISION_BLOCK condition
     BlockConnectionPath connectionPath; //All the slave graphical connections
@@ -172,9 +171,9 @@ struct AppOutput {
 };
 
 struct UserInput {
-    int inputIsActive=false; ///CHANGE // id of the block or false
-    int activeField=false; ///CHANGE // id of the active input field or false
-    int numberOfFields=0;
+    int inputIsActive=false; // id of the block or false
+    int activeField=1; // id of the active input field
+    int numberOfFields=1;
     sf::RectangleShape userInputBackground;
     sf::Text userInputTitle;
     sf::RectangleShape userInputField[3];
@@ -201,7 +200,6 @@ struct WindowProps {
 struct Variables {
     int varsNumber=0; //Total number of variables
     struct Variable {
-        //int id;
         char name[VAR_NAME_SIZE]; //Variable name
         long double value; //Variable value
     }var[MAX_NUMBER_OF_VARS];
@@ -236,18 +234,12 @@ int main()
     /////verificare functie postfixat
     /*
     char s[256];
-
     strcpy(s,"30+2*(10+5)+7");
-
     ///Ar trebui sa obtin 3215+*+7+
-
     int val = calcul_expresie_f(s);
-
     cout << val;
     cout << "\n\n";
-
     strcpy(s, "30 / 3 == 5 * 2");
-
     if(valoare_adevar_expresie(s))
     {
         cout << "Adevarat";
@@ -256,8 +248,6 @@ int main()
     {
         cout << "True";
     }
-
-
     cout << "\n\n";
     char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE];
     int code_line_size = 0;

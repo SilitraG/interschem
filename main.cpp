@@ -237,7 +237,6 @@ int main()
     ///Ar trebui sa obtin 3215+*+7+
     int val = calcul_expresie_f(s);
     cout << val;
-    cout << "\n\n";
     strcpy(s, "30 / 3 == 5 * 2");
     if(valoare_adevar_expresie(s))
     {

@@ -223,14 +223,13 @@ struct BlocksList {
 int main()
 {
 
-///////////////// TESTE VICTOR /////////////////
+    ///////////////// TESTE VICTOR /////////////////
     //codeCreator();
     //codeIterator(code.first);
     //varTester();
     appWindow();
 
-     ///////////////// TESTE FLORIN /////////////////
-     ///////////////// TESTE FLORIN /////////////////
+    ///////////////// TESTE FLORIN /////////////////
     /////verificare functie postfixat
     /*
     char s[256];
@@ -250,8 +249,8 @@ int main()
     }
     cout << "\n\n";
     char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE];
-    int code_line_size = 0;
-    output_code(code.first, code.vars, code_text, code_line_size);
+    int code_line_size;
+    output_code(code.first, code.vars, code_text, code_line_size); ///code_text = char [][] si code_line_size = numarul de linii din code_text
     */
     return 0;
 }

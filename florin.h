@@ -156,10 +156,9 @@ int calcul_expresie_f(char expresie[])
     }
 
     ///#########################################
+    ///####CALCULAREA EXPRESIEI POSTFIXATA######
     ///#########################################
-    ///CALCULAREA EXPRESIEI POSTFIXATA
-    ///#########################################
-    ///#########################################
+
 
 
     Nod_postfixat *stiva = new Nod_postfixat;
@@ -330,28 +329,31 @@ void output_code(LogicBlock *first_block, Variables vars, char code_text[MAX_NUM
     */
 
     code_line_size = 0;
-    strcpy(code_text[code_line_size++],"#include <iostream>");
-    strcpy(code_text[code_line_size++],"#include <math.h>");
-    strcpy(code_text[code_line_size++],"using namespace std;");
-    strcpy(code_text[code_line_size++],"int main()");
-    strcpy(code_text[code_line_size++],"{");
-    strcpy(code_text[code_line_size++],"\tint ");
+    strcpy(code_text[++code_line_size],"#include <iostream>");
+    strcpy(code_text[++code_line_size],"#include <math.h>");
+    strcpy(code_text[++code_line_size],"using namespace std;");
+    strcpy(code_text[++code_line_size],"int main()");
+    strcpy(code_text[++code_line_size],"{");
+    strcpy(code_text[++code_line_size],"\tint ");
 
     LogicBlock *step = first_block;
 
-    for(int i = 0; i < vars.varsNumber; i++)
+    for(int i = 1; i <= code.vars.varsNumber; i++)
     {
         strcat(code_text[code_line_size], " ");
-        strcat(code_text[code_line_size], vars.var[step->varId].name);
-
+        strcat(code_text[code_line_size], code.vars.var[i].name);
+        strcat(code_text[code_line_size], ",");
     }
+    strcat(code_text[code_line_size], "\b;");
 
-    strcpy(code_text[code_line_size++], "\treturn 0;");
-    strcpy(code_text[code_line_size++], "}");
+
+
+    strcpy(code_text[++code_line_size], "\treturn 0;");
+    strcpy(code_text[++code_line_size], "}");
 
     ///verificare
     cout <<"\n\nSource Code: \n\n";
-    for(int i = 0; i < code_line_size; i++)
+    for(int i = 1; i <= code_line_size; i++)
     {
         cout << code_text[i] << "\n";
     }
@@ -365,5 +367,4 @@ void output_code(LogicBlock *first_block, Variables vars, char code_text[MAX_NUM
     }
     else
         first_block = first_block->next;
-
 }

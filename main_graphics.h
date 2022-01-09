@@ -19,10 +19,10 @@ void appWindow()
     drawNewBlock(sf::Vector2f(450, 200), OUTPUT_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(250, 230), DECISION_BLOCK, arialMedium);
 
+
     drawAppMenu(arialMedium);
     drawAppOutput(arialMedium);
     drawAddBlockMenu(arialMedium);
-    //updateUserInputScreen(6, arialMedium);
 
     //cout << code.allBlocks[2]->blockTitle.getLocalBounds().width; //for text centering
 
@@ -45,7 +45,7 @@ void appWindow()
                 break;
 
             case sf::Event::TextEntered: // Keyboard text
-                if(code.appProps.userInput.inputIsActive && code.appProps.userInput.activeField) {
+                if(code.appProps.userInput.inputIsActive) {
                     updateUserInputString(event.text.unicode);
                 }
                 break;
@@ -54,13 +54,15 @@ void appWindow()
                 switch (event.key.code) {
                 case sf::Mouse::Left:
                     code.appProps.mouseIsPressed = true;
-                    if(mouseIsOnAddBlock() != -1){
-                        addBlockIsPressedHandler(mouseIsOnAddBlock(), arialMedium);
+                    if(code.appProps.userInput.inputIsActive == false) {
+                        if(mouseIsOnAddBlock() != -1){
+                            addBlockIsPressedHandler(mouseIsOnAddBlock(), arialMedium);
+                        }
+
                     }
-                    if(mouseIsOnBlockMenuButton() != -1) {
-                        blockMenuButtonIsPressedHandler(mouseIsOnBlockMenuButton());
+                    if(mouseIsOnBlockMenuButton() == -1) {
+                        code.appProps.blockMenu.blockMenuIsActive = false;
                     }
-                    code.appProps.blockMenu.blockMenuIsActive = false;
                     break;
                 case sf::Mouse::Right:
                     break;
@@ -68,10 +70,25 @@ void appWindow()
                 break;
 
             case sf::Event::MouseButtonReleased: // Mouse released buttons
+                if(code.appProps.userInput.inputIsActive != false && mouseIsOnItem(code.appProps.userInput.userInputBackground.getPosition(), code.appProps.userInput.userInputBackground.getSize()) == false) {
+                    userInputButtonIsPressedHandler(1);
+                }
                 switch (event.key.code) {
                 case sf::Mouse::Left:
-                    if(mouseIsOnAppOutputButton() != -1) {
-                        appOutputButtonIsPressedHandler(mouseIsOnAppOutputButton());
+                    if(mouseIsOnUserInputButton() != -1) {
+                        userInputButtonIsPressedHandler(mouseIsOnUserInputButton());
+                    }
+                    if(code.appProps.userInput.inputIsActive == false) {
+                        if(mouseIsOnBlockMenuButton() != -1) {
+                            blockMenuButtonIsPressedHandler(mouseIsOnBlockMenuButton(), arialMedium);
+                        }
+                        if(mouseIsOnAppOutputButton() != -1) {
+                            appOutputButtonIsPressedHandler(mouseIsOnAppOutputButton());
+                        }
+                    } else {
+                        if(mouseIsOnUserInputField() != -1) {
+                            code.appProps.userInput.activeField = mouseIsOnUserInputField();
+                        }
                     }
                     code.appProps.mouseIsPressed = false;
                     code.appProps.block.blockIsBeingMoved = false;
@@ -79,8 +96,10 @@ void appWindow()
                     break;
                 case sf::Mouse::Right:
                     code.appProps.blockMenu.blockMenuIsActive = false;
-                    if(mouseIsOnBlock() != -1) {
-                        updateBlockMenu(mouseIsOnBlock(), arialMedium);
+                    if(code.appProps.userInput.inputIsActive == false) {
+                        if(mouseIsOnBlock() != -1) {
+                            updateBlockMenu(mouseIsOnBlock(), arialMedium);
+                        }
                     }
                     break;
                 }
@@ -94,7 +113,7 @@ void appWindow()
             }
         }
 
-        if(code.appProps.mouseIsPressed) {
+        if(code.appProps.mouseIsPressed && code.appProps.userInput.inputIsActive == false) {
             if(code.appProps.block.blockIsBeingMoved) {
                 moveBlock(code.appProps.block.blockIsBeingMoved);
             }
@@ -113,7 +132,6 @@ void appWindow()
         displayAllLogicBlocks(window);
         displayBlockMenu(window);
         displayUserInput(window);
-
         /// END OF DRAWING ZONE ///
 
         window.display();

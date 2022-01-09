@@ -122,15 +122,6 @@ void expresie_postfixata_f(char expresie[], Sir_postfixat postfixat[], int &j)
                 push_f(stiva, expresie[i]);
             }
         }
-        cout<<"Sir postfixat: ";
-        for(int k = 0; k < j; k++)   ///afisare sir postfixat ////////COUT PARTIAL
-        {
-            cout << postfixat[k].nume;
-        }
-        cout << "\nStiva:\n";
-        afisare(stiva);             ///afisare stiva/////////COUT PARTIAL
-        cout <<"\n\n";
-
     }
     while(stiva != NULL)
     {
@@ -154,6 +145,7 @@ int calcul_expresie_f(char expresie[])
     {
         cout << postfixat[i].nume << "-";
     }
+    cout << "\n\n";
 
     ///#########################################
     ///####CALCULAREA EXPRESIEI POSTFIXATA######

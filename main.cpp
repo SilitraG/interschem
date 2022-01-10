@@ -14,6 +14,7 @@
 #define MAX_NUMBER_OF_BLOCKS 51
 #define MAX_NUMBER_OF_CODE_LINE 200
 #define MAX_LINE_OF_CODE_SIZE 255
+#define MAX_VALUE_LENGTH 9
 
 //Window & app
 #define WINDOW_WIDTH 1280
@@ -249,7 +250,7 @@ int main()
     cout << "\n\n";
     char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE];
     int code_line_size;
-    output_code(code.first, code.vars, code_text, code_line_size); ///code_text = char [][] si code_line_size = numarul de linii din code_text
+    output_code(code.first, code_text, code_line_size); ///code_text = char [][] si code_line_size = numarul de linii din code_text
     */
     return 0;
 }

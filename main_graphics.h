@@ -14,16 +14,16 @@ void appWindow()
 
     drawNewBlock(sf::Vector2f(200, 100), START_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(400, 600), STOP_BLOCK, arialMedium);
-    drawNewBlock(sf::Vector2f(500, 500), INPUT_BLOCK, arialMedium);
+    drawNewBlock(sf::Vector2f(450, 200), INPUT_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(200, 400), ASSIGN_BLOCK, arialMedium);
-    drawNewBlock(sf::Vector2f(450, 200), OUTPUT_BLOCK, arialMedium);
+    drawNewBlock(sf::Vector2f(500, 500), OUTPUT_BLOCK, arialMedium);
     drawNewBlock(sf::Vector2f(250, 230), DECISION_BLOCK, arialMedium);
 
-    /*
+
     ///############################################
     ///############# TESTARE FUNCTII ##############
     ///############################################
-
+    /*
     int j = 1;
     char chr_var[] = "a";
     int int_var = 4;
@@ -50,6 +50,7 @@ void appWindow()
         }
     }
     */
+
 
 
     drawAppMenu(arialMedium);

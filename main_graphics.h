@@ -43,7 +43,8 @@ void appWindow()
             {
                 code.allBlocks[i]->varId = j;
                 code.vars.varsNumber++;
-                strcpy(code.vars.var[j].name, chr_var);
+                strcpy(code.vars.var[j].name, "bej");
+                code.vars.var[j].value = 68;
                 j++;
                 chr_var[0]++;
             }

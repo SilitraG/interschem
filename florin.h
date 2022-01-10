@@ -57,7 +57,7 @@ int prioritate_f(char c1, char c2)
     return 0;
 }
 
-void afisare(Nod *p)
+void afisare_f(Nod *p)
 {
     while(p != NULL)
     {
@@ -66,14 +66,130 @@ void afisare(Nod *p)
     }
 }
 
-int transformare_int_f(char cuv[])
+int transformare_int_f(char word[])
 {
-    int nr = 0;
-    for(int i = 0; i < strlen(cuv); i++)
+    int value = 0;
+    for(int i = 0; i < strlen(word); i++)
     {
-        nr = nr * 10 + (int)cuv[i] - 48;
+        value = value * 10 + (int)word[i] - 48;
     }
-    return nr;
+    return value;
+}
+
+void transformare_char_f(int value, char word[])
+{
+    int inv = 0;
+    while(value)
+    {
+        inv = inv * 10 + value % 10;
+        value /= 10;
+    }
+
+    int i = 0;
+    while(inv)
+    {
+        word[i] = (char)(inv % 10) + 48;
+        i++;
+        inv /= 10;
+    }
+    word[i] = 0;
+}
+
+bool is_letter_f(char c)
+{
+    if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+    {
+        return true;
+    }
+    return false;
+}
+
+bool is_while_f(LogicBlock *first)
+{
+    first = first->tru;
+
+    while(first != NULL)
+    {
+        if(first->typeId < 0)     ///daca regasesc valoarea negativa atribuita in typeId, inseamna ca este structura repetitiva
+        {
+            return true;
+        }
+        if(first->typeId == DECISION_BLOCK)
+        {
+            first = first->tru;
+        }
+        else
+        {
+            first = first->next;
+        }
+    }
+    return false;
+}
+
+int number_of_block_where_IFblock_stop(LogicBlock *step_r, LogicBlock *step_l)
+{
+    LogicBlock *first_r = step_r;
+
+    while(first_r != NULL)  ///parcurg blocurile din partea dreapta a decision.ului pentru a pune -1 peste tot
+    {
+        first_r->typeId *= (-1);
+
+        if(first_r->typeId == (-1) * DECISION_BLOCK)
+            first_r = first_r->fls;
+        else
+            first_r = first_r->next;
+    }
+
+
+    int cnt = 0;
+    while(step_l != NULL) ///parcurg blocurile din partea stanga a decisionului pentru a pune -1 peste tot
+    {
+        cnt++;
+        step_l->typeId *= (-1);
+        if(step_l->typeId > 0)  /// cand gasesc valoare pozitiva, gasesc intersectia celor doua ramuri, adica finalul if.ului
+        {
+            return cnt-1;
+        }
+        if(step_l->typeId == (-1) * DECISION_BLOCK)
+            step_l = step_l->fls;
+        else
+            step_l = step_l->next;
+    }
+    return cnt;
+
+}
+
+void golire_valori_negative(LogicBlock *step)
+{
+    if(step->typeId < 0)
+        step->typeId *= (-1);
+    if(step->typeId == DECISION_BLOCK)
+    {
+        golire_valori_negative(step->tru);
+        golire_valori_negative(step->fls);
+    }
+    else
+    {
+        if(step->next != NULL)
+            golire_valori_negative(step->next);
+    }
+}
+
+void implementare_tab_f(char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int number_of_tabs, int code_line_size)
+{
+    for(int i = 0; i < number_of_tabs; i++)
+    {
+        strcat(code_text[code_line_size], "\t");
+    }
+
+}
+
+void replace_variable_name_with_value_f(char expresie[], int i)
+{
+    while(is_letter_f(expresie[i]))
+    {
+        strcpy(expresie+i, expresie + i + 1);
+    }
 }
 
 void expresie_postfixata_f(char expresie[], Sir_postfixat postfixat[], int &j)
@@ -122,6 +238,7 @@ void expresie_postfixata_f(char expresie[], Sir_postfixat postfixat[], int &j)
                 push_f(stiva, expresie[i]);
             }
         }
+
     }
     while(stiva != NULL)
     {
@@ -138,6 +255,8 @@ int calcul_expresie_f(char expresie[])
     int n = 0, i;
 
     Sir_postfixat postfixat[200];
+
+
 
     expresie_postfixata_f(expresie, postfixat, n);          ///formez expresia postfixata ce va contine n 'elemente'
 
@@ -279,7 +398,6 @@ int valoare_adevar_expresie(char expresie[])
             }
             break;
 
-
         case '>':
             if(operand[1] == '=')
             {
@@ -308,8 +426,162 @@ int valoare_adevar_expresie(char expresie[])
 
 }
 
-void output_code(LogicBlock *first_block, Variables vars, char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int &code_line_size)
+void parcurgere_lista_blocuri(LogicBlock *step, char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int &code_line_size, int &number_of_tabs, int number_of_IFdecisions_accesed, int number_of_blocks_inside_IFdecision)
 {
+    while(step != NULL)
+    {
+        switch(step->typeId)
+        {
+            case -5:
+                number_of_IFdecisions_accesed = 1;
+                number_of_blocks_inside_IFdecision = 1;
+                step->typeId *= (-1);
+                break;
+
+            case INPUT_BLOCK:
+                code_line_size++;
+                implementare_tab_f(code_text, number_of_tabs, code_line_size);
+                strcat(code_text[code_line_size], "cin >> ");
+                strcat(code_text[code_line_size], code.vars.var[step->varId].name);
+                strcat(code_text[code_line_size], ";");
+                step = step->next;
+                break;
+
+            case OUTPUT_BLOCK:
+                code_line_size++;
+                implementare_tab_f(code_text, number_of_tabs, code_line_size);
+                strcat(code_text[code_line_size], "cout << ");
+                strcat(code_text[code_line_size], code.vars.var[step->varId].name);
+                strcat(code_text[code_line_size], ";");
+                step = step->next;
+                break;
+
+            case ASSIGN_BLOCK:
+                code_line_size++;
+                implementare_tab_f(code_text, number_of_tabs, code_line_size);
+                strcat(code_text[code_line_size], code.vars.var[step->varId].name);
+                strcat(code_text[code_line_size], " = ");
+                strcat(code_text[code_line_size], step->varFullExpression);
+                strcat(code_text[code_line_size], ";");
+                step = step->next;
+                break;
+
+            case DECISION_BLOCK:
+                code_line_size++;
+                step->typeId *= (-1);
+                implementare_tab_f(code_text, number_of_tabs, code_line_size);
+
+                if(is_while_f(step))
+                {
+                    strcat(code_text[code_line_size], "while(");
+                }
+                else
+                {
+                    strcat(code_text[code_line_size], "if(");
+                }
+
+                strcat(code_text[code_line_size], step->varFullExpression);
+                strcat(code_text[code_line_size], ")");
+
+                code_line_size++;
+                implementare_tab_f(code_text, number_of_tabs, code_line_size);
+                strcat(code_text[code_line_size], "{");
+                number_of_tabs++;
+
+                if(is_while_f(step))
+                {
+                    parcurgere_lista_blocuri(step->tru, code_text, code_line_size, number_of_tabs, number_of_IFdecisions_accesed, number_of_blocks_inside_IFdecision);
+                    step = step->fls;
+                    number_of_tabs--;
+                    code_line_size++;
+                    implementare_tab_f(code_text, number_of_tabs, code_line_size);
+                    strcat(code_text[code_line_size], "}");
+                }
+                else
+                {
+                    number_of_IFdecisions_accesed++;
+                    number_of_blocks_inside_IFdecision = number_of_block_where_IFblock_stop(step->fls, step->tru);
+                    golire_valori_negative(step);
+                    parcurgere_lista_blocuri(step->tru, code_text, code_line_size, number_of_tabs, number_of_IFdecisions_accesed, number_of_blocks_inside_IFdecision);
+
+                    number_of_IFdecisions_accesed--;
+                    number_of_blocks_inside_IFdecision = 0;
+                    number_of_tabs--;
+                    code_line_size++;
+                    implementare_tab_f(code_text, number_of_tabs, code_line_size);
+                    strcat(code_text[code_line_size], "}");
+
+                    code_line_size++;
+                    implementare_tab_f(code_text, number_of_tabs, code_line_size);
+                    strcat(code_text[code_line_size], "else");
+
+                    code_line_size++;
+                    implementare_tab_f(code_text, number_of_tabs, code_line_size);
+                    strcat(code_text[code_line_size], "{");
+                    number_of_tabs++;
+
+                    number_of_IFdecisions_accesed++;
+                    number_of_blocks_inside_IFdecision = number_of_block_where_IFblock_stop(step->fls, step->tru);
+                    int aux = number_of_blocks_inside_IFdecision;
+                    golire_valori_negative(step);
+                    parcurgere_lista_blocuri(step->fls, code_text, code_line_size, number_of_tabs, number_of_IFdecisions_accesed, number_of_blocks_inside_IFdecision);
+
+                    number_of_IFdecisions_accesed--;
+                    number_of_blocks_inside_IFdecision = 0;
+                    number_of_tabs--;
+                    code_line_size++;
+                    implementare_tab_f(code_text, number_of_tabs, code_line_size);
+                    strcat(code_text[code_line_size], "}");
+                    while(aux)
+                    {
+                        if(step->typeId == DECISION_BLOCK)
+                            step = step->fls;
+                        else
+                            step = step->next;
+                        aux--;
+                    }
+                    step = step->next;
+                }
+                break;
+
+            case STOP_BLOCK:
+                strcpy(code_text[++code_line_size], "\treturn 0;");
+                strcpy(code_text[++code_line_size], "}");
+                step = step->next;
+                break;
+
+            default:
+                step = step->next;
+                break;
+        }
+        if(number_of_IFdecisions_accesed)
+        {
+            number_of_blocks_inside_IFdecision--;
+            if(!number_of_blocks_inside_IFdecision)
+                break;
+        }
+    }
+}
+
+void output_code(LogicBlock *first_block, char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int &code_line_size)
+{
+    int number_of_tabs = 0;
+    code_line_size = 0;
+    strcpy(code_text[++code_line_size],"#include <iostream>");
+    strcpy(code_text[++code_line_size],"#include <math.h>");
+    strcpy(code_text[++code_line_size],"using namespace std;");
+    strcpy(code_text[++code_line_size],"int main()");
+    strcpy(code_text[++code_line_size],"{");
+    strcpy(code_text[++code_line_size],"\tint ");
+
+    for(int i = 1; i <= code.vars.varsNumber; i++)
+    {
+        strcat(code_text[code_line_size], " ");
+        strcat(code_text[code_line_size], code.vars.var[i].name);
+        strcat(code_text[code_line_size], ",");
+    }
+    strcat(code_text[code_line_size], "\b;");
+
     /*
     EMPTY_BLOCK 0
     START_BLOCK 1
@@ -320,43 +592,17 @@ void output_code(LogicBlock *first_block, Variables vars, char code_text[MAX_NUM
     STOP_BLOCK 6   ///  return
     */
 
-    code_line_size = 0;
-    strcpy(code_text[++code_line_size],"#include <iostream>");
-    strcpy(code_text[++code_line_size],"#include <math.h>");
-    strcpy(code_text[++code_line_size],"using namespace std;");
-    strcpy(code_text[++code_line_size],"int main()");
-    strcpy(code_text[++code_line_size],"{");
-    strcpy(code_text[++code_line_size],"\tint ");
-
     LogicBlock *step = first_block;
 
-    for(int i = 1; i <= code.vars.varsNumber; i++)
-    {
-        strcat(code_text[code_line_size], " ");
-        strcat(code_text[code_line_size], code.vars.var[i].name);
-        strcat(code_text[code_line_size], ",");
-    }
-    strcat(code_text[code_line_size], "\b;");
-
-
-
-    strcpy(code_text[++code_line_size], "\treturn 0;");
-    strcpy(code_text[++code_line_size], "}");
+    number_of_tabs++;
+    parcurgere_lista_blocuri(step, code_text, code_line_size, number_of_tabs, 0 , 0);
 
     ///verificare
+    /*
     cout <<"\n\nSource Code: \n\n";
     for(int i = 1; i <= code_line_size; i++)
     {
         cout << code_text[i] << "\n";
     }
-
-    if(step->typeId == 5)
-    {
-        if(step->tru)
-            step = step->tru;
-        else
-            step = step->fls;
-    }
-    else
-        first_block = first_block->next;
+    */
 }

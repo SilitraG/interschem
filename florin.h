@@ -66,7 +66,7 @@ void afisare_f(Nod *p)
     }
 }
 
-int transformare_int_f(char word[])
+int transform_char_to_int_f(char word[])
 {
     int value = 0;
     for(int i = 0; i < strlen(word); i++)
@@ -76,7 +76,7 @@ int transformare_int_f(char word[])
     return value;
 }
 
-void transformare_char_f(int value, char word[])
+void transform_int_to_char_f(int value, char word[])
 {
     int inv = 0;
     while(value)
@@ -102,6 +102,42 @@ bool is_letter_f(char c)
         return true;
     }
     return false;
+}
+
+void replace_variable_name_with_value_f(char expresie[])
+{
+    char aux[VAR_EXPRESSION_SIZE];
+    for(int i = 0; i < strlen(expresie); i++)
+    {
+        if(is_letter_f(expresie[i]))
+        {
+            int pozitie = 0, index_var;
+            char var_name[VAR_NAME_SIZE] = "";
+            char value_string[MAX_VALUE_LENGTH] = "";
+
+            while(is_letter_f(expresie[i]))
+            {
+                var_name[pozitie] = expresie[i];
+                pozitie++;
+                strcpy(expresie+i, expresie + i + 1);
+            }
+            var_name[pozitie] = 0;
+
+            for(index_var = 0; index_var < code.vars.varsNumber; index_var++)
+            {
+                if(strcmp(var_name, code.vars.var[index_var].name) == 0)
+                {
+                    break;
+                }
+            }
+            transform_int_to_char_f(code.vars.var[index_var].value, value_string);
+
+            strcpy(aux, expresie + i);
+            strcpy(expresie + i, value_string);
+            strcpy(expresie + strlen(value_string), aux);
+        }
+    }
+
 }
 
 bool is_while_f(LogicBlock *first)
@@ -184,11 +220,22 @@ void implementare_tab_f(char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE
 
 }
 
-void replace_variable_name_with_value_f(char expresie[], int i)
+void golire_code_text_f(char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE])
 {
-    while(is_letter_f(expresie[i]))
+    for(int i = 1; strlen(code_text[i]) != 0; i++)
     {
-        strcpy(expresie+i, expresie + i + 1);
+        strcpy(code_text[i], "");
+    }
+}
+
+void eliminare_spatii_expresie(char expresie[])
+{
+    for(int i=0; i < strlen(expresie); i++)
+    {
+        if(expresie[i] == ' ')
+        {
+            strcpy(expresie + i, expresie + i + 1);
+        }
     }
 }
 
@@ -198,6 +245,8 @@ void expresie_postfixata_f(char expresie[], Sir_postfixat postfixat[], int &j)
 
     Nod *stiva = new Nod;
     stiva = NULL;
+
+    eliminare_spatii_expresie(expresie);
 
     j = 0;
 
@@ -222,6 +271,7 @@ void expresie_postfixata_f(char expresie[], Sir_postfixat postfixat[], int &j)
                 while(top_f(stiva) != '(')
                 {
                     postfixat[j].nume[0] = top_f(stiva);
+                    postfixat[j].nume[1] = 0;
                     j++;
                     pop_f(stiva);
                 }
@@ -232,6 +282,7 @@ void expresie_postfixata_f(char expresie[], Sir_postfixat postfixat[], int &j)
                 while(stiva != NULL && prioritate_f(top_f(stiva), expresie[i]) != 0) ///caz in care semnul din varful stivei e mai imp decat cel actual din expresie
                 {
                     postfixat[j].nume[0] = top_f(stiva);
+                    postfixat[j].nume[1] = 0;
                     j++;
                     pop_f(stiva);
                 }
@@ -254,9 +305,9 @@ int calcul_expresie_f(char expresie[])
 
     int n = 0, i;
 
-    Sir_postfixat postfixat[200];
+    Sir_postfixat postfixat[VAR_EXPRESSION_SIZE];
 
-
+    replace_variable_name_with_value_f(expresie);         ///inlocuieste denumirea variabilelor cu valoarea lor in string.ul de expresie
 
     expresie_postfixata_f(expresie, postfixat, n);          ///formez expresia postfixata ce va contine n 'elemente'
 
@@ -271,7 +322,6 @@ int calcul_expresie_f(char expresie[])
     ///#########################################
 
 
-
     Nod_postfixat *stiva = new Nod_postfixat;
 
     int valoare = 0;
@@ -279,7 +329,7 @@ int calcul_expresie_f(char expresie[])
     {
         if(strchr("0123456789", postfixat[i].nume[0])!=0)
         {
-            push_int_f(stiva, transformare_int_f(postfixat[i].nume));
+            push_int_f(stiva, transform_char_to_int_f(postfixat[i].nume));
         }
         else
         {
@@ -342,7 +392,7 @@ int calcul_expresie_f(char expresie[])
 
 int valoare_adevar_expresie(char expresie[])
 {
-    char stanga[256]="", dreapta[256]="";
+    char stanga[VAR_EXPRESSION_SIZE] = "", dreapta[VAR_EXPRESSION_SIZE] = "";
     int i = 0;
     int poz_stanga = 0, poz_dreapta = 0, poz_operand = 0;
     while(strchr("<>=!",expresie[i]) == 0)
@@ -511,36 +561,48 @@ void parcurgere_lista_blocuri(LogicBlock *step, char code_text[MAX_NUMBER_OF_COD
                     implementare_tab_f(code_text, number_of_tabs, code_line_size);
                     strcat(code_text[code_line_size], "}");
 
-                    code_line_size++;
-                    implementare_tab_f(code_text, number_of_tabs, code_line_size);
-                    strcat(code_text[code_line_size], "else");
-
-                    code_line_size++;
-                    implementare_tab_f(code_text, number_of_tabs, code_line_size);
-                    strcat(code_text[code_line_size], "{");
-                    number_of_tabs++;
-
-                    number_of_IFdecisions_accesed++;
-                    number_of_blocks_inside_IFdecision = number_of_block_where_IFblock_stop(step->fls, step->tru);
-                    int aux = number_of_blocks_inside_IFdecision;
+                    number_of_blocks_inside_IFdecision = number_of_block_where_IFblock_stop(step->tru, step->fls);
+                    int aux = number_of_blocks_inside_IFdecision; ///copie pe numarul de blocuri al ramurei else
                     golire_valori_negative(step);
-                    parcurgere_lista_blocuri(step->fls, code_text, code_line_size, number_of_tabs, number_of_IFdecisions_accesed, number_of_blocks_inside_IFdecision);
 
-                    number_of_IFdecisions_accesed--;
-                    number_of_blocks_inside_IFdecision = 0;
-                    number_of_tabs--;
-                    code_line_size++;
-                    implementare_tab_f(code_text, number_of_tabs, code_line_size);
-                    strcat(code_text[code_line_size], "}");
-                    while(aux)
+                    if(number_of_blocks_inside_IFdecision) ///daca ramura else exista
                     {
-                        if(step->typeId == DECISION_BLOCK)
-                            step = step->fls;
-                        else
-                            step = step->next;
-                        aux--;
+                        number_of_IFdecisions_accesed++;
+                        code_line_size++;
+                        implementare_tab_f(code_text, number_of_tabs, code_line_size);
+                        strcat(code_text[code_line_size], "else");
+
+                        code_line_size++;
+                        implementare_tab_f(code_text, number_of_tabs, code_line_size);
+                        strcat(code_text[code_line_size], "{");
+                        number_of_tabs++;
+                        parcurgere_lista_blocuri(step->fls, code_text, code_line_size, number_of_tabs, number_of_IFdecisions_accesed, number_of_blocks_inside_IFdecision);
+
+                        number_of_IFdecisions_accesed--;
+                        number_of_blocks_inside_IFdecision = 0;
+                        number_of_tabs--;
+                        code_line_size++;
+                        implementare_tab_f(code_text, number_of_tabs, code_line_size);
+                        strcat(code_text[code_line_size], "}");
                     }
-                    step = step->next;
+
+                    if(aux) ///daca else.ul exista
+                    {
+                        while(aux)
+                        {
+                            if(step->typeId == DECISION_BLOCK)
+                                step = step->fls;
+                            else                    ///parcurg fls sau parcurg next pana epuizez numarul de blocuri din block.ul else
+                                step = step->next;
+                            aux--;
+                        }
+                        step = step->next; ///trec la urmatorul bloc
+                    }
+                    else
+                    {
+                        step = step->fls; ///daca block.ul else nu contine nimic, trec direct la urmatorul block cu ajutorul fls.ului
+                    }
+
                 }
                 break;
 
@@ -565,8 +627,12 @@ void parcurgere_lista_blocuri(LogicBlock *step, char code_text[MAX_NUMBER_OF_COD
 
 void output_code(LogicBlock *first_block, char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int &code_line_size)
 {
+
+    golire_code_text_f(code_text);
+
     int number_of_tabs = 0;
     code_line_size = 0;
+
     strcpy(code_text[++code_line_size],"#include <iostream>");
     strcpy(code_text[++code_line_size],"#include <math.h>");
     strcpy(code_text[++code_line_size],"using namespace std;");
@@ -597,7 +663,8 @@ void output_code(LogicBlock *first_block, char code_text[MAX_NUMBER_OF_CODE_LINE
     number_of_tabs++;
     parcurgere_lista_blocuri(step, code_text, code_line_size, number_of_tabs, 0 , 0);
 
-    ///verificare
+
+    ///AFISARE COD IN CONSOLA
     /*
     cout <<"\n\nSource Code: \n\n";
     for(int i = 1; i <= code_line_size; i++)
@@ -605,4 +672,5 @@ void output_code(LogicBlock *first_block, char code_text[MAX_NUMBER_OF_CODE_LINE
         cout << code_text[i] << "\n";
     }
     */
+
 }

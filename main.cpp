@@ -202,7 +202,7 @@ struct Variables {
     int varsNumber=0; //Total number of variables
     struct Variable {
         char name[VAR_NAME_SIZE]; //Variable name
-        long double value; //Variable value
+        int value; //Variable value
     }var[MAX_NUMBER_OF_VARS];
 };
 
@@ -251,6 +251,9 @@ int main()
     char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE];
     int code_line_size;
     output_code(code.first, code_text, code_line_size); ///code_text = char [][] si code_line_size = numarul de linii din code_text
+    
+    val = calcul_expresie_f(code.allBlocks[4]->varFullExpression);
+    cout << val;
     */
     return 0;
 }

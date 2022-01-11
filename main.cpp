@@ -198,12 +198,14 @@ struct WindowProps {
     sf::Vector2f mousePos; //Mouse position
 };
 
+struct Variable {
+    char name[VAR_NAME_SIZE]; //Variable name
+    int value; //Variable value
+};
+
 struct Variables {
     int varsNumber=0; //Total number of variables
-    struct Variable {
-        char name[VAR_NAME_SIZE]; //Variable name
-        int value; //Variable value
-    }var[MAX_NUMBER_OF_VARS];
+    Variable var[MAX_NUMBER_OF_VARS];
 };
 
 struct BlocksList {
@@ -254,6 +256,8 @@ int main()
     
     val = calcul_expresie_f(code.allBlocks[4]->varFullExpression);
     cout << val;
+    
+    cout_to_binary_file();
     */
     return 0;
 }

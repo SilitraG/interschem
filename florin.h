@@ -650,7 +650,7 @@ void output_code(LogicBlock *first_block, char code_text[MAX_NUMBER_OF_CODE_LINE
         strcat(code_text[code_line_size], code.vars.var[i].name);
         strcat(code_text[code_line_size], ",");
     }
-    strcat(code_text[code_line_size], "\b;");
+    code_text[code_line_size][strlen(code_text[code_line_size]) - 1] = ';';
 
     /*
     EMPTY_BLOCK 0

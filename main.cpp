@@ -15,6 +15,7 @@
 #define MAX_NUMBER_OF_CODE_LINE 50
 #define MAX_LINE_OF_CODE_SIZE 255
 #define MAX_VALUE_LENGTH 9
+#define MAX_FILE_NAME_LENGTH 30
 
 //Window & app
 #define WINDOW_WIDTH 1280

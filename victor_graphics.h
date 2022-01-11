@@ -238,6 +238,8 @@ void drawNewBlock(sf::Vector2f blockPos, int blockType, sf::Font &textFont) {
         case INPUT_BLOCK:
             code.allBlocks[blockId]->blockTitle.setString("INPUT");
             code.allBlocks[blockId]->typeId = INPUT_BLOCK;
+            ///TESTARE
+            ///strcpy(code.allBlocks[blockId]->varFullExpression,"a == 4");
             break;
         case OUTPUT_BLOCK:
             code.allBlocks[blockId]->blockTitle.setString("OUTPUT");
@@ -246,10 +248,14 @@ void drawNewBlock(sf::Vector2f blockPos, int blockType, sf::Font &textFont) {
         case ASSIGN_BLOCK:
             code.allBlocks[blockId]->blockTitle.setString("ASSIGN");
             code.allBlocks[blockId]->typeId = ASSIGN_BLOCK;
+            ///TESTARE
+            ///strcpy(code.allBlocks[blockId]->varFullExpression,"bej + 1");
             break;
         case DECISION_BLOCK:
             code.allBlocks[blockId]->blockTitle.setString("DECISION");
             code.allBlocks[blockId]->typeId = DECISION_BLOCK;
+            ///TESTARE
+            ///strcpy(code.allBlocks[blockId]->varFullExpression,"b == 4");
             break;
         case STOP_BLOCK:
             code.allBlocks[blockId]->blockTitle.setString("STOP");
@@ -553,6 +559,19 @@ void appOutputButtonIsPressedHandler(int buttonId) {
         char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]; ///indexat de la 1
         int code_line_size;
         output_code(code.first, code_text, code_line_size); ///codul ce urmeaza a fi afisat in interfata grafica se regaseste in code_text[][]
+
+        /// TESTARE FUNCTIE CITIRE DIN FISIER BINAR
+        /*
+        for(int i = 1; i <= code.numberOfBlocks; i++)
+        {
+            if(code.allBlocks[i]->typeId == ASSIGN_BLOCK || code.allBlocks[i]->typeId == INPUT_BLOCK)
+                strcpy(code.allBlocks[4]->varFullExpression, "EXPRESIE INAINTE DE CITIRE");
+        }
+
+        cin_from_binary_file("interschem_0003");
+        for(int i = 1; i <= code.numberOfBlocks; i++)
+            cout << code.allBlocks[i]->varFullExpression << "!!!!!!!!!!!!!\n";
+            */
     }
 }
 

@@ -1,5 +1,9 @@
 #include <iostream>
 #include <cstring>
+#include <fstream>
+#include <sstream>
+#include<string>
+#include <iomanip>
 
 using namespace std;
 
@@ -665,12 +669,102 @@ void output_code(LogicBlock *first_block, char code_text[MAX_NUMBER_OF_CODE_LINE
 
 
     ///AFISARE COD IN CONSOLA
-    /*
+
     cout <<"\n\nSource Code: \n\n";
     for(int i = 1; i <= code_line_size; i++)
     {
         cout << code_text[i] << "\n";
     }
-    */
 
 }
+
+int file_count()
+{
+    int filecount = 0;
+    while(1)
+    {
+        stringstream filename;
+        filename << "./saves/interschem_" << setw(4) << setfill('0') << filecount << ".dat";
+        ifstream in_b(filename.str(), ios::binary);
+        if(!in_b)
+        {
+            break;
+        }
+        filecount++;
+    }
+    return filecount;
+}
+
+int cout_to_binary_file()
+{
+    int filecount = file_count();
+
+    stringstream filename;
+    filename << "./saves/interschem_" << setw(4) << setfill('0') << filecount << ".dat";
+    ofstream out_b(filename.str(), ios::binary);
+    if(!out_b)
+    {
+        cout << "Cannot open file!" << endl;
+        return 0;
+    }
+
+    out_b.write((char *) &code.vars.varsNumber, sizeof(int));
+    out_b.write((char *) &code.numberOfBlocks, sizeof(int));
+
+    for(int i = 1; i <= code.vars.varsNumber; i++)
+    {
+        out_b.write((char *) &code.vars.var[i], sizeof(Variable));
+    }
+
+    for(int i = 1; i <= code.numberOfBlocks; i++)
+    {
+        ///out_b.write((char *) &code.allBlocks[i], sizeof(LogicBlock));
+
+        out_b.write((char *) &code.allBlocks[i]->block, sizeof(sf::RectangleShape));
+        out_b.write((char *) &code.allBlocks[i]->blockTitle, sizeof(sf::Text));
+        out_b.write((char *) &code.allBlocks[i]->blockPos, sizeof(sf::Vector2f));
+        out_b.write((char *) &code.allBlocks[i]->typeId, sizeof(int));
+        out_b.write((char *) &code.allBlocks[i]->varId, sizeof(int));
+        out_b.write((char *) &code.allBlocks[i]->varFullExpression, sizeof(char));
+        out_b.write((char *) &code.allBlocks[i]->connectionPath, sizeof(BlockConnectionPath));
+        out_b.write((char *) &code.allBlocks[i]->numberOfPrevs, sizeof(int));
+    }
+    out_b.close();
+    return 1;
+}
+
+int cin_from_binary_file(char file_name[])
+{
+    stringstream filename;
+    filename << "./saves/" << file_name << ".dat";
+    ifstream in_b(filename.str(), ios::binary);
+    if(!in_b)
+    {
+        cout << "Cannot open file!" << endl;
+        return 0;
+    }
+    in_b.read((char *) &code.vars.varsNumber, sizeof(int));
+    in_b.read((char *) &code.numberOfBlocks, sizeof(int));
+
+    cout << code.vars.varsNumber << "AICI a mers\n";
+
+    for(int i = 1; i <= code.vars.varsNumber; i++)
+    {
+        in_b.read((char *) &code.vars.var[i], sizeof(Variable));
+    }
+
+    for(int i = 1; i <= code.numberOfBlocks; i++)
+    {
+        in_b.read((char *) &code.allBlocks[i]->block, sizeof(sf::RectangleShape));
+        in_b.read((char *) &code.allBlocks[i]->blockTitle, sizeof(sf::Text));
+        in_b.read((char *) &code.allBlocks[i]->blockPos, sizeof(sf::Vector2f));
+        in_b.read((char *) &code.allBlocks[i]->typeId, sizeof(int));
+        in_b.read((char *) &code.allBlocks[i]->varId, sizeof(int));
+        in_b.read((char *) &code.allBlocks[i]->varFullExpression, sizeof(char));
+        in_b.read((char *) &code.allBlocks[i]->connectionPath, sizeof(BlockConnectionPath));
+        in_b.read((char *) &code.allBlocks[i]->numberOfPrevs, sizeof(int));
+    }
+    in_b.close();
+    return 1;
+}
+

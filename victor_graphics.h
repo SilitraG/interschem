@@ -175,6 +175,13 @@ void drawAppOutput(sf::Font &textFont) {
     code.appProps.appOutput.appOutputArea.setPosition(sf::Vector2f(APP_OUTPUT_POS_X+APP_OUTPUT_BORDER_THICKNESS, APP_OUTPUT_POS_Y+APP_MENU_SIZE_Y+APP_OUTPUT_BORDER_THICKNESS));
     code.appProps.appOutput.appOutputArea.setFillColor(APP_OUTPUT_BUTTON_COLOR);
 
+    for(int i = 1; i <= MAX_NUMBER_OF_CODE_LINE; i++) {
+        code.appProps.appOutput.codeOutput[i].setPosition(sf::Vector2f(code.appProps.appOutput.appOutputArea.getPosition().x, code.appProps.appOutput.appOutputArea.getPosition().y+13*(i-1)));
+        code.appProps.appOutput.codeOutput[i].setFillColor(APP_OUTPUT_BUTTON_TEXT_COLOR);
+        code.appProps.appOutput.codeOutput[i].setFont(textFont);
+        code.appProps.appOutput.codeOutput[i].setCharacterSize(APP_OUTPUT_BUTTON_TEXT_SIZE);
+    }
+
 }
 
 // Draws the "Add Block" menu + the blocks inside it
@@ -221,6 +228,7 @@ void drawNewBlock(sf::Vector2f blockPos, int blockType, sf::Font &textFont) {
     code.allBlocks[blockId]->blockPos = blockPos;
     code.allBlocks[blockId]->block.setPosition(code.allBlocks[blockId]->blockPos);
     code.allBlocks[blockId]->block.setSize(sf::Vector2f(BLOCK_SIZE_X, BLOCK_SIZE_Y));
+    code.allBlocks[blockId]->blockExpression.setFont(textFont);
     if(blockType == START_BLOCK) {
         code.allBlocks[blockId]->block.setFillColor(START_BLOCK_COLOR);
     } else if(blockType == STOP_BLOCK) {
@@ -416,7 +424,7 @@ void updateBlockMenu(int blockId, sf::Font &textFont) {
 
 }
 
-void updateUserInputScreen (int blockId, sf::Font &textFont) {
+void updateUserInputScreen(int blockId, sf::Font &textFont) {
     code.appProps.userInput.inputIsActive = blockId;
     code.appProps.userInput.activeField = 1;
     code.appProps.userInput.numberOfFields = 2;
@@ -473,6 +481,8 @@ void updateUserInputScreen (int blockId, sf::Font &textFont) {
                 code.appProps.userInput.userInputText[1].setString(varName);
                 strcpy(varName, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
             }
+            code.appProps.userInput.userInputText[2].setString(code.allBlocks[blockId]->varFullExpression);
+            code.appProps.userInput.userInputString[2] = code.allBlocks[blockId]->varFullExpression;
         } else if(blockType == OUTPUT_BLOCK) {
             code.appProps.userInput.fieldTitle[1].setString("VARIABLE NAME:");
 
@@ -502,12 +512,11 @@ void updateUserInputScreen (int blockId, sf::Font &textFont) {
 
     code.appProps.userInput.userInputButtonText[1].setString("CANCEL");
     code.appProps.userInput.userInputButtonText[2].setString("SUBMIT");
-
 }
 
-void updateUserInputString (char userChar) {
+void updateUserInputString(char userChar) {
     int activeField = code.appProps.userInput.activeField;
-    if((int)userChar == 8 && code.appProps.userInput.userInputString[activeField].getSize() != 0) {
+    if((int)userChar == 8 && code.appProps.userInput.userInputString[activeField].getSize() != 0) { // if backspace is pressed
         code.appProps.userInput.userInputString[activeField].erase(code.appProps.userInput.userInputString[activeField].getSize() - 1, 1);
     } else if((int)userChar != 8){
         code.appProps.userInput.userInputString[activeField] += userChar;
@@ -521,6 +530,17 @@ void updateUserInputString (char userChar) {
 
 }
 
+void updateAppOutput(int numberOfLines, char outputText[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]) {
+    for(int i = 1; i <= MAX_NUMBER_OF_CODE_LINE; i++) {
+        code.appProps.appOutput.codeOutput[i].setString("");
+    }
+    for(int i = 1; i <= numberOfLines; i++) {
+        string line = "";
+        appendCharToString(outputText[i], line);
+        code.appProps.appOutput.codeOutput[i].setString(line);
+    }
+}
+
 void addBlockIsPressedHandler(int buttonId, sf::Font &textFont) {
     drawNewBlock(code.appProps.addBlockMenu.dummyBlock[buttonId].getPosition(), buttonId+1, textFont);
     code.appProps.addBlockMenu.blockIsBeingAdded = true;
@@ -530,7 +550,7 @@ void addBlockIsPressedHandler(int buttonId, sf::Font &textFont) {
 void blockMenuButtonIsPressedHandler(int buttonId, sf::Font &textFont) {
     int blockType = code.allBlocks[code.appProps.blockMenu.blockMenuIsActive]->typeId;
     string buttonText = code.appProps.blockMenu.menuButtonsTitle[buttonId].getString().toAnsiString();
-    //cout << buttonText.compare(MENU_BLOCK_CONNECTION) << '\n';
+
     if(buttonText.compare(MENU_BLOCK_CONNECTION) == 0) {
         startConnection(code.appProps.blockMenu.blockMenuIsActive);
     } else if(buttonText.compare(MENU_BLOCK_T_CONNECTION) == 0) {
@@ -553,13 +573,14 @@ void blockMenuButtonIsPressedHandler(int buttonId, sf::Font &textFont) {
 void appOutputButtonIsPressedHandler(int buttonId) {
     if(buttonId == 1) { // Run Code Button
         codeIterator(code.first);
+        varTester();
         cout << '\n';
     } else { // Generate Code Button
 
         char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]; ///indexat de la 1
         int code_line_size;
         output_code(code.first, code_text, code_line_size); ///codul ce urmeaza a fi afisat in interfata grafica se regaseste in code_text[][]
-
+        updateAppOutput(code_line_size, code_text);
         /// TESTARE FUNCTIE CITIRE DIN FISIER BINAR
         /*
         for(int i = 1; i <= code.numberOfBlocks; i++)
@@ -580,20 +601,35 @@ void userInputButtonIsPressedHandler(int buttonId) {
     int blockType = code.allBlocks[blockId]->typeId;
     int varId;
     char varName[VAR_NAME_SIZE];
+    string expression;
     if(buttonId == 1) {
 
     } else {
+        code.allBlocks[blockId]->blockExpression.setPosition(code.allBlocks[blockId]->block.getPosition().x, code.allBlocks[blockId]->block.getPosition().y+BLOCK_SIZE_Y/2);
+        code.allBlocks[blockId]->blockExpression.setCharacterSize(BLOCK_TEXT_SIZE);
+        code.allBlocks[blockId]->blockExpression.setFillColor(BLOCK_TEXT_COLOR);
         if(blockType == INPUT_BLOCK || blockType == ASSIGN_BLOCK) {
             strcpy(varName, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
             varId = addVariable(varName);
             code.allBlocks[blockId]->varId = varId;
             strcpy(code.allBlocks[blockId]->varFullExpression, code.appProps.userInput.userInputString[2].toAnsiString().c_str());
+
+            appendCharToString(code.vars.var[varId].name, expression);
+            appendCharToString(" = ", expression);
+            appendCharToString(code.allBlocks[blockId]->varFullExpression, expression);
+            code.allBlocks[blockId]->blockExpression.setString(expression);
         } else if(blockType == OUTPUT_BLOCK) {
             strcpy(varName, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
             varId = addVariable(varName);
             code.allBlocks[blockId]->varId = varId;
+
+            appendCharToString(code.vars.var[varId].name, expression);
+            code.allBlocks[blockId]->blockExpression.setString(expression);
         } else if(blockType == DECISION_BLOCK) {
             strcpy(code.allBlocks[blockId]->varFullExpression, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
+
+            appendCharToString(code.allBlocks[blockId]->varFullExpression, expression);
+            code.allBlocks[blockId]->blockExpression.setString(expression);
         }
     }
     code.appProps.userInput.userInputString[1].clear();
@@ -656,7 +692,8 @@ void moveBlock(int blockId) {
                     code.appProps.block.blockIsBeingMoved = blockId;
                 }
                 code.allBlocks[blockId]->block.setPosition(code.appProps.mousePos.x - code.appProps.block.xDif, code.appProps.mousePos.y - code.appProps.block.yDif);
-                code.allBlocks[blockId]->blockTitle.setPosition(code.appProps.mousePos.x - code.appProps.block.xDif, code.appProps.mousePos.y - code.appProps.block.yDif);
+                code.allBlocks[blockId]->blockTitle.setPosition(code.allBlocks[blockId]->block.getPosition());
+                code.allBlocks[blockId]->blockExpression.setPosition(code.allBlocks[blockId]->block.getPosition().x, code.allBlocks[blockId]->block.getPosition().y+BLOCK_SIZE_Y/2);
                 moveConnections(blockId);
                 blockBounds = code.allBlocks[blockId]->block.getGlobalBounds();
             }
@@ -666,7 +703,8 @@ void moveBlock(int blockId) {
         if(blockBounds.intersects(addBlockMenuBounds) ){
             if(code.appProps.addBlockMenu.blockIsBeingAdded == false) {
                 code.allBlocks[blockId]->block.setPosition(sf::Vector2f(ADD_BLOCK_MENU_SIZE_X, code.allBlocks[blockId]->block.getPosition().y));
-                code.allBlocks[blockId]->blockTitle.setPosition(sf::Vector2f(ADD_BLOCK_MENU_SIZE_X, code.allBlocks[blockId]->block.getPosition().y));
+                code.allBlocks[blockId]->blockTitle.setPosition(sf::Vector2f(code.allBlocks[blockId]->block.getPosition()));
+                code.allBlocks[blockId]->blockExpression.setPosition(code.allBlocks[blockId]->block.getPosition().x, code.allBlocks[blockId]->block.getPosition().y+BLOCK_SIZE_Y/2);
                 moveConnections(blockId);
                 blockBounds = code.allBlocks[blockId]->block.getGlobalBounds();
             } else {
@@ -676,7 +714,8 @@ void moveBlock(int blockId) {
                     code.appProps.block.blockIsBeingMoved = blockId;
                 }
                 code.allBlocks[blockId]->block.setPosition(code.appProps.mousePos.x - code.appProps.block.xDif, code.appProps.mousePos.y - code.appProps.block.yDif);
-                code.allBlocks[blockId]->blockTitle.setPosition(code.appProps.mousePos.x - code.appProps.block.xDif, code.appProps.mousePos.y - code.appProps.block.yDif);
+                code.allBlocks[blockId]->blockTitle.setPosition(sf::Vector2f(code.allBlocks[blockId]->block.getPosition()));
+                code.allBlocks[blockId]->blockExpression.setPosition(code.allBlocks[blockId]->block.getPosition().x, code.allBlocks[blockId]->block.getPosition().y+BLOCK_SIZE_Y/2);
                 moveConnections(blockId);
                 blockBounds = code.allBlocks[blockId]->block.getGlobalBounds();
             }
@@ -684,21 +723,24 @@ void moveBlock(int blockId) {
 
         if(blockBounds.intersects(appOutputBounds)) {
             code.allBlocks[blockId]->block.setPosition(sf::Vector2f(code.appProps.appOutput.appOutputBackground.getPosition().x-BLOCK_SIZE_X, code.allBlocks[blockId]->block.getPosition().y));
-            code.allBlocks[blockId]->blockTitle.setPosition(sf::Vector2f(code.appProps.appOutput.appOutputBackground.getPosition().x-BLOCK_SIZE_X, code.allBlocks[blockId]->block.getPosition().y));
+            code.allBlocks[blockId]->blockTitle.setPosition(sf::Vector2f(code.allBlocks[blockId]->block.getPosition()));
+            code.allBlocks[blockId]->blockExpression.setPosition(code.allBlocks[blockId]->block.getPosition().x, code.allBlocks[blockId]->block.getPosition().y+BLOCK_SIZE_Y/2);
             moveConnections(blockId);
             blockBounds = code.allBlocks[blockId]->block.getGlobalBounds();
         }
 
         if(blockBounds.intersects(appMenuBounds)) {
             code.allBlocks[blockId]->block.setPosition(sf::Vector2f(code.allBlocks[blockId]->block.getPosition().x, APP_MENU_SIZE_Y));
-            code.allBlocks[blockId]->blockTitle.setPosition(sf::Vector2f(code.allBlocks[blockId]->block.getPosition().x, APP_MENU_SIZE_Y));
+            code.allBlocks[blockId]->blockTitle.setPosition(sf::Vector2f(code.allBlocks[blockId]->block.getPosition()));
+            code.allBlocks[blockId]->blockExpression.setPosition(code.allBlocks[blockId]->block.getPosition().x, code.allBlocks[blockId]->block.getPosition().y+BLOCK_SIZE_Y/2);
             moveConnections(blockId);
             blockBounds = code.allBlocks[blockId]->block.getGlobalBounds();
         }
 
         if(code.allBlocks[blockId]->block.getPosition().y+BLOCK_SIZE_Y > WINDOW_HEIGHT) {
             code.allBlocks[blockId]->block.setPosition(sf::Vector2f(code.allBlocks[blockId]->block.getPosition().x, WINDOW_HEIGHT-BLOCK_SIZE_Y));
-            code.allBlocks[blockId]->blockTitle.setPosition(sf::Vector2f(code.allBlocks[blockId]->block.getPosition().x, WINDOW_HEIGHT-BLOCK_SIZE_Y));
+            code.allBlocks[blockId]->blockTitle.setPosition(sf::Vector2f(code.allBlocks[blockId]->block.getPosition()));
+            code.allBlocks[blockId]->blockExpression.setPosition(code.allBlocks[blockId]->block.getPosition().x, code.allBlocks[blockId]->block.getPosition().y+BLOCK_SIZE_Y/2);
             moveConnections(blockId);
             blockBounds = code.allBlocks[blockId]->block.getGlobalBounds();
         }
@@ -713,6 +755,9 @@ void displayAppOutput(sf::RenderWindow &window) {
     for(int i = 1; i <= 2; i++) {
         window.draw(code.appProps.appOutput.appOutputButton[i]);
         window.draw(code.appProps.appOutput.appOutputButtonText[i]);
+    }
+    for(int i = 1; i <= MAX_NUMBER_OF_CODE_LINE; i++) {
+        window.draw(code.appProps.appOutput.codeOutput[i]);
     }
 }
 
@@ -754,6 +799,7 @@ void displayAllLogicBlocks(sf::RenderWindow &window) {
         if(code.allBlocks[i]->typeId != EMPTY_BLOCK) {
             window.draw(code.allBlocks[i]->block);
             window.draw(code.allBlocks[i]->blockTitle);
+            window.draw(code.allBlocks[i]->blockExpression);
             displayConnection(i, window);
         }
     }
@@ -789,4 +835,3 @@ void displayUserInput(sf::RenderWindow &window) {
 }
 
 /// /////////// END OF DISPLAY ////////////////////////
-

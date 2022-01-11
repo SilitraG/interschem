@@ -6,16 +6,14 @@ using namespace std;
 
 //Input: variable name
 //Output: variable index or -1(doesn't exist)
-int variableNameToIndex(char name[]) {
-    int index = -1;
-
+int variableNameToIndex(char varName[]) {
     for(int i = 1; i <= code.vars.varsNumber; i++) {
-        if(strcmp(name, code.vars.var[i].name) == 0) {
-            index=i;
+        if(strcmp(varName, code.vars.var[i].name) == 0) {
+            return i;
         }
     }
 
-    return index;
+    return -1;
 
 }
 
@@ -46,6 +44,16 @@ void startConnection(int blockId) {
         code.appProps.connection.masterBlockId = blockId;
     }
 
+}
+
+void appendCharToString(char chars[], string &s) {
+    for (int i = 0; i < strlen(chars); i++) {
+        if(int(chars[i]) != 8) {
+            s = s + chars[i];
+        } else if(!s.empty()) {
+            s.resize(s.size() - 1);
+        }
+    }
 }
 
 /// ----------- BLOCK LOGIC FUNCTIONS -----------

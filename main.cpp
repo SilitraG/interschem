@@ -12,7 +12,7 @@
 #define VAR_NAME_SIZE 31
 #define VAR_EXPRESSION_SIZE 51
 #define MAX_NUMBER_OF_BLOCKS 51
-#define MAX_NUMBER_OF_CODE_LINE 200
+#define MAX_NUMBER_OF_CODE_LINE 50
 #define MAX_LINE_OF_CODE_SIZE 255
 #define MAX_VALUE_LENGTH 9
 
@@ -22,7 +22,7 @@
 #define WINDOW_COLOR Black
 
 //Block
-#define BLOCK_SIZE_X 100
+#define BLOCK_SIZE_X 120
 #define BLOCK_SIZE_Y 40
 #define BLOCK_TEXT_SIZE 16
 #define START_BLOCK_COLOR sf::Color::Red
@@ -116,13 +116,14 @@ struct BlockConnectionPath {
 struct LogicBlock {
     sf::RectangleShape block; //Visual block
     sf::Text blockTitle; //Visual text inside the block
+    sf::Text blockExpression; //Expression of the block for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK or DECISION_BLOCK condition
     sf::Vector2f blockPos; //Position of the block
     int typeId=EMPTY_BLOCK; //Block type (check def)
     int varId=-1; //Variable ID for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK
-    char varFullExpression[VAR_EXPRESSION_SIZE]={NULL}; //Full math expression for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK or DECISION_BLOCK condition
+    char varFullExpression[VAR_EXPRESSION_SIZE+1]={NULL}; //Full math expression for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK or DECISION_BLOCK condition
     BlockConnectionPath connectionPath; //All the slave graphical connections
     int numberOfPrevs=0;
-    LogicBlock *prev[MAX_NUMBER_OF_BLOCKS]={NULL}; //All previous blocks
+    LogicBlock *prev[MAX_NUMBER_OF_BLOCKS+1]={NULL}; //All previous blocks
     LogicBlock *next=NULL; //Next block
     LogicBlock *tru=NULL; //Next block if true (for DECISION_BLOCK)
     LogicBlock *fls=NULL; //Next block if false (for DECISION_BLOCK)
@@ -160,8 +161,8 @@ struct AddBlockMenu {
 
 struct AppMenu {
     sf::RectangleShape appMenuBackground;
-    sf::RectangleShape appMenuButton[NUMBER_OF_APP_MENU_BUTTONS];
-    sf::Text appMenuButtonText[NUMBER_OF_APP_MENU_BUTTONS];
+    sf::RectangleShape appMenuButton[NUMBER_OF_APP_MENU_BUTTONS+1];
+    sf::Text appMenuButtonText[NUMBER_OF_APP_MENU_BUTTONS+1];
 };
 
 struct AppOutput {
@@ -169,6 +170,7 @@ struct AppOutput {
     sf::RectangleShape appOutputArea;
     sf::RectangleShape appOutputButton[3];
     sf::Text appOutputButtonText[3];
+    sf::Text codeOutput[MAX_NUMBER_OF_CODE_LINE+1];
 };
 
 struct UserInput {
@@ -205,13 +207,13 @@ struct Variable {
 
 struct Variables {
     int varsNumber=0; //Total number of variables
-    Variable var[MAX_NUMBER_OF_VARS];
+    Variable var[MAX_NUMBER_OF_VARS+1];
 };
 
 struct BlocksList {
     Variables vars; //The vars created and used by the code
     int numberOfBlocks = 0;
-    LogicBlock *allBlocks[MAX_NUMBER_OF_BLOCKS]= {NULL}; //All blocks in adding order
+    LogicBlock *allBlocks[MAX_NUMBER_OF_BLOCKS+1]= {NULL}; //All blocks in adding order
     LogicBlock *first=NULL; //First block of the code
     LogicBlock *last=NULL; //Last block of the code
     WindowProps appProps; //Props for graphics
@@ -253,10 +255,10 @@ int main()
     char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE];
     int code_line_size;
     output_code(code.first, code_text, code_line_size); ///code_text = char [][] si code_line_size = numarul de linii din code_text
-    
+
     val = calcul_expresie_f(code.allBlocks[4]->varFullExpression);
     cout << val;
-    
+
     cout_to_binary_file();
     */
     return 0;

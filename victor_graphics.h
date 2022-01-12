@@ -221,7 +221,7 @@ void drawAppOutput(sf::Font &textFont) {
     code.appProps.appOutput.appOutputArea.setPosition(sf::Vector2f(APP_OUTPUT_POS_X+APP_OUTPUT_BORDER_THICKNESS, APP_OUTPUT_POS_Y+APP_MENU_SIZE_Y+APP_OUTPUT_BORDER_THICKNESS));
     code.appProps.appOutput.appOutputArea.setFillColor(APP_OUTPUT_BUTTON_COLOR);
 
-    for(int i = 1; i <= MAX_NUMBER_OF_CODE_LINE; i++) {
+    for(int i = 1; i < MAX_NUMBER_OF_CODE_LINE; i++) {
         code.appProps.appOutput.codeOutput[i].setPosition(sf::Vector2f(code.appProps.appOutput.appOutputArea.getPosition().x, code.appProps.appOutput.appOutputArea.getPosition().y+13*(i-1)));
         code.appProps.appOutput.codeOutput[i].setFillColor(APP_OUTPUT_BUTTON_TEXT_COLOR);
         code.appProps.appOutput.codeOutput[i].setFont(textFont);
@@ -560,6 +560,60 @@ void updateUserInputScreen(int blockId, sf::Font &textFont) {
     code.appProps.userInput.userInputButtonText[2].setString("SUBMIT");
 }
 
+void updateUserInputImportScreen(sf::Font &textFont) {
+    code.appProps.userInput.inputIsActive = -1;
+    code.appProps.userInput.activeField = 1;
+    code.appProps.userInput.numberOfFields = 1;
+
+    code.appProps.userInput.userInputBackground.setPosition(sf::Vector2f(USER_INPUT_POS_X, USER_INPUT_POS_Y));
+    code.appProps.userInput.userInputBackground.setSize(sf::Vector2f(USER_INPUT_SIZE_X, USER_INPUT_SIZE_Y));
+    code.appProps.userInput.userInputBackground.setFillColor(USER_INPUT_BACKGROUND_COLOR);
+    code.appProps.userInput.userInputBackground.setOutlineThickness(USER_INPUT_BACKGROUND_BORDER_THICKNESS);
+    code.appProps.userInput.userInputBackground.setOutlineColor(USER_INPUT_BACKGROUND_BORDER_COLOR);
+
+    code.appProps.userInput.userInputTitle.setPosition(sf::Vector2f(USER_INPUT_POS_X, USER_INPUT_POS_Y));
+    code.appProps.userInput.userInputTitle.setString("IMPORT");
+    code.appProps.userInput.userInputTitle.setFont(textFont);
+    code.appProps.userInput.userInputTitle.setCharacterSize(20);
+    code.appProps.userInput.userInputTitle.setStyle(sf::Text::Bold);
+    code.appProps.userInput.userInputTitle.setFillColor(sf::Color::Black);
+
+    code.appProps.userInput.fieldTitle[1].setPosition(sf::Vector2f(USER_INPUT_FIELD_TITLE_X, USER_INPUT_POS_Y+90+(code.appProps.userInput.numberOfFields==1?40:0)));
+    code.appProps.userInput.fieldTitle[1].setFont(textFont);
+    code.appProps.userInput.fieldTitle[1].setCharacterSize(15);
+    code.appProps.userInput.fieldTitle[1].setStyle(sf::Text::Bold);
+    code.appProps.userInput.fieldTitle[1].setFillColor(sf::Color::Black);
+
+    code.appProps.userInput.userInputField[1].setPosition(sf::Vector2f(USER_INPUT_FIELD_POS_X, code.appProps.userInput.fieldTitle[1].getPosition().y-10));
+    code.appProps.userInput.userInputField[1].setSize(sf::Vector2f(USER_INPUT_FIELD_SIZE_X, USER_INPUT_FIELD_SIZE_Y));
+    code.appProps.userInput.userInputField[1].setFillColor(sf::Color::White);
+    code.appProps.userInput.userInputField[1].setOutlineThickness(USER_INPUT_BACKGROUND_BORDER_THICKNESS);
+    code.appProps.userInput.userInputField[1].setOutlineColor(USER_INPUT_BACKGROUND_BORDER_COLOR);
+
+    code.appProps.userInput.userInputText[1].setPosition(sf::Vector2f(USER_INPUT_FIELD_POS_X, code.appProps.userInput.fieldTitle[1].getPosition().y-2));
+    code.appProps.userInput.userInputText[1].setFont(textFont);
+    code.appProps.userInput.userInputText[1].setCharacterSize(20);
+    code.appProps.userInput.userInputText[1].setFillColor(sf::Color::Black);
+
+    code.appProps.userInput.fieldTitle[1].setString("FILE NAME:");
+
+    for(int i = 1; i <= 2; i++) {
+        code.appProps.userInput.userInputButton[i].setSize(sf::Vector2f(USER_INPUT_BUTTON_SIZE_X, USER_INPUT_BUTTON_SIZE_Y));
+        code.appProps.userInput.userInputButton[i].setPosition(sf::Vector2f(USER_INPUT_POS_X+(USER_INPUT_SIZE_X-2*USER_INPUT_BUTTON_SIZE_X-200)/2+(200+USER_INPUT_BUTTON_SIZE_X)*(i-1),USER_INPUT_BUTTON_POS_Y));
+        code.appProps.userInput.userInputButton[i].setOutlineThickness(USER_INPUT_BACKGROUND_BORDER_THICKNESS);
+        code.appProps.userInput.userInputButton[i].setOutlineColor(USER_INPUT_BACKGROUND_BORDER_COLOR);
+
+        code.appProps.userInput.userInputButtonText[i].setPosition(code.appProps.userInput.userInputButton[i].getPosition());
+        code.appProps.userInput.userInputButtonText[i].setFont(textFont);
+        code.appProps.userInput.userInputButtonText[i].setCharacterSize(15);
+        code.appProps.userInput.userInputButtonText[i].setStyle(sf::Text::Bold);
+        code.appProps.userInput.userInputButtonText[i].setFillColor(sf::Color::Black);
+    }
+
+    code.appProps.userInput.userInputButtonText[1].setString("CANCEL");
+    code.appProps.userInput.userInputButtonText[2].setString("OPEN");
+}
+
 void updateUserInputString(char userChar) {
     int activeField = code.appProps.userInput.activeField;
     if((int)userChar == 8 && code.appProps.userInput.userInputString[activeField].getSize() != 0) { // if backspace is pressed
@@ -577,7 +631,7 @@ void updateUserInputString(char userChar) {
 }
 
 void updateAppOutput(int numberOfLines, char outputText[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]) {
-    for(int i = 1; i <= MAX_NUMBER_OF_CODE_LINE; i++) {
+    for(int i = 1; i < MAX_NUMBER_OF_CODE_LINE; i++) {
         code.appProps.appOutput.codeOutput[i].setString("");
     }
     for(int i = 1; i <= numberOfLines; i++) {
@@ -618,15 +672,14 @@ void blockMenuButtonIsPressedHandler(int buttonId, sf::Font &textFont) {
 
 void appOutputButtonIsPressedHandler(int buttonId) {
     if(buttonId == 1) { // Run Code Button
-        //codeIterator(code.first); // testare legaturi
+        codeIterator(code.first); // testare legaturi
         int numberOfLines=0;
         char codeOutput[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]={NULL};
-       /// run_code(code.first, codeOutput, numberOfLines);
         varTester(numberOfLines, codeOutput);
         updateAppOutput(numberOfLines, codeOutput);
     } else { // Generate Code Button
 
-        char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE] ={NULL}; ///indexat de la 1
+        char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]; ///indexat de la 1
         int code_line_size;
         output_code(code.first, code_text, code_line_size); ///codul ce urmeaza a fi afisat in interfata grafica se regaseste in code_text[][]
         updateAppOutput(code_line_size, code_text);
@@ -646,39 +699,47 @@ void appOutputButtonIsPressedHandler(int buttonId) {
 }
 
 void userInputButtonIsPressedHandler(int buttonId) {
-    int blockId = code.appProps.userInput.inputIsActive;
-    int blockType = code.allBlocks[blockId]->typeId;
-    int varId;
-    char varName[VAR_NAME_SIZE];
-    string expression;
-    if(buttonId == 1) {
+    if(buttonId == 1) { // cancel button
 
-    } else {
-        code.allBlocks[blockId]->blockExpression.setPosition(code.allBlocks[blockId]->block.getPosition().x, code.allBlocks[blockId]->block.getPosition().y+BLOCK_SIZE_Y/2);
-        code.allBlocks[blockId]->blockExpression.setCharacterSize(BLOCK_TEXT_SIZE);
-        code.allBlocks[blockId]->blockExpression.setFillColor(BLOCK_TEXT_COLOR);
-        if(blockType == INPUT_BLOCK || blockType == ASSIGN_BLOCK) {
-            strcpy(varName, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
-            varId = addVariable(varName);
-            code.allBlocks[blockId]->varId = varId;
-            strcpy(code.allBlocks[blockId]->varFullExpression, code.appProps.userInput.userInputString[2].toAnsiString().c_str());
+    } else { // submit button
+        if(code.appProps.userInput.inputIsActive != -1) { // for blocks input
+            int blockId = code.appProps.userInput.inputIsActive;
+            int blockType = code.allBlocks[blockId]->typeId;
+            int varId;
+            char varName[VAR_NAME_SIZE];
+            string expression;
 
-            appendCharToString(code.vars.var[varId].name, expression);
-            appendCharToString(" = ", expression);
-            appendCharToString(code.allBlocks[blockId]->varFullExpression, expression);
-            code.allBlocks[blockId]->blockExpression.setString(expression);
-        } else if(blockType == OUTPUT_BLOCK) {
-            strcpy(varName, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
-            varId = addVariable(varName);
-            code.allBlocks[blockId]->varId = varId;
+            code.allBlocks[blockId]->blockExpression.setPosition(code.allBlocks[blockId]->block.getPosition().x, code.allBlocks[blockId]->block.getPosition().y+BLOCK_SIZE_Y/2);
+            code.allBlocks[blockId]->blockExpression.setCharacterSize(BLOCK_TEXT_SIZE);
+            code.allBlocks[blockId]->blockExpression.setFillColor(BLOCK_TEXT_COLOR);
+            if(blockType == INPUT_BLOCK || blockType == ASSIGN_BLOCK) {
+                strcpy(varName, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
+                varId = addVariable(varName);
+                code.allBlocks[blockId]->varId = varId;
+                strcpy(code.allBlocks[blockId]->varFullExpression, code.appProps.userInput.userInputString[2].toAnsiString().c_str());
 
-            appendCharToString(code.vars.var[varId].name, expression);
-            code.allBlocks[blockId]->blockExpression.setString(expression);
-        } else if(blockType == DECISION_BLOCK) {
-            strcpy(code.allBlocks[blockId]->varFullExpression, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
+                appendCharToString(code.vars.var[varId].name, expression);
+                appendCharToString(" = ", expression);
+                appendCharToString(code.allBlocks[blockId]->varFullExpression, expression);
+                code.allBlocks[blockId]->blockExpression.setString(expression);
+            } else if(blockType == OUTPUT_BLOCK) {
+                strcpy(varName, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
+                varId = addVariable(varName);
+                code.allBlocks[blockId]->varId = varId;
 
-            appendCharToString(code.allBlocks[blockId]->varFullExpression, expression);
-            code.allBlocks[blockId]->blockExpression.setString(expression);
+                appendCharToString(code.vars.var[varId].name, expression);
+                code.allBlocks[blockId]->blockExpression.setString(expression);
+            } else if(blockType == DECISION_BLOCK) {
+                strcpy(code.allBlocks[blockId]->varFullExpression, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
+
+                appendCharToString(code.allBlocks[blockId]->varFullExpression, expression);
+                code.allBlocks[blockId]->blockExpression.setString(expression);
+            }
+        } else { // for import input
+            //deleteAllBlocks();
+            char fileName[MAX_FILE_NAME_LENGTH];
+            strcpy(fileName, code.appProps.userInput.userInputString[1].toAnsiString().c_str());
+            cin_from_binary_file(fileName);
         }
     }
     code.appProps.userInput.userInputString[1].clear();
@@ -689,11 +750,11 @@ void userInputButtonIsPressedHandler(int buttonId) {
 
 }
 
-void menuButtonIsPressedHandler(int buttonId) {
+void menuButtonIsPressedHandler(int buttonId, sf::Font &textFont) {
     if(buttonId == 1) { // Import code
-
+        updateUserInputImportScreen(textFont);
     } else if(buttonId == 2) { // Export code
-
+        cout_to_binary_file();
     } else if(buttonId == 3) { // Clear blocks
         deleteAllBlocks();
     }
@@ -816,7 +877,7 @@ void displayAppOutput(sf::RenderWindow &window) {
         window.draw(code.appProps.appOutput.appOutputButton[i]);
         window.draw(code.appProps.appOutput.appOutputButtonText[i]);
     }
-    for(int i = 1; i <= MAX_NUMBER_OF_CODE_LINE; i++) {
+    for(int i = 1; i < MAX_NUMBER_OF_CODE_LINE; i++) {
         window.draw(code.appProps.appOutput.codeOutput[i]);
     }
 }

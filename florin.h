@@ -129,7 +129,7 @@ void replace_variable_name_with_value_f(char expresie[])
             }
             var_name[pozitie] = 0;
 
-            for(index_var = 0; index_var < code.vars.varsNumber; index_var++)
+            for(index_var = 1; index_var <= code.vars.varsNumber; index_var++)
             {
                 if(strcmp(var_name, code.vars.var[index_var].name) == 0)
                 {
@@ -140,7 +140,8 @@ void replace_variable_name_with_value_f(char expresie[])
 
             strcpy(aux, expresie + i);
             strcpy(expresie + i, value_string);
-            strcpy(expresie + strlen(value_string), aux);
+            strcpy(expresie + i + strlen(value_string), aux);
+
         }
     }
 
@@ -323,10 +324,12 @@ int calcul_expresie_f(char expresie[])
             break;
         }
     }
+
     if(!ok)
     {
         return transform_char_to_int_f(expresie);
     }
+
 
     expresie_postfixata_f(expresie, postfixat, n);   ///formez expresia postfixata ce va contine n 'elemente'
 
@@ -747,6 +750,18 @@ int file_count()
     return filecount;
 }
 
+int search_block_in_allBlocks(LogicBlock *cautat)
+{
+    for(int i = 1; i <= code.numberOfBlocks; i++)
+    {
+        if(code.allBlocks[i] == cautat)
+        {
+            return i;
+        }
+    }
+    return NULL;
+}
+
 int cout_to_binary_file()
 {
     int filecount = file_count();
@@ -801,6 +816,17 @@ int cout_to_binary_file()
             out_b.write((char *) &code.allBlocks[i]->connectionPath.flsPath[j][1], sizeof(sf::Vertex));
         }
         out_b.write((char *) &code.allBlocks[i]->numberOfPrevs, sizeof(int));
+        for(int j = 1; j <= code.allBlocks[i]->numberOfPrevs; j++)
+        {
+            int indice = search_block_in_allBlocks(code.allBlocks[i]->prev[j]);
+            out_b.write((char *) &indice, sizeof(int));
+        }
+        int indice = search_block_in_allBlocks(code.allBlocks[i]->next);
+        out_b.write((char *) &indice, sizeof(int));
+        indice = search_block_in_allBlocks(code.allBlocks[i]->tru);
+        out_b.write((char *) &indice, sizeof(int));
+        indice = search_block_in_allBlocks(code.allBlocks[i]->fls);
+        out_b.write((char *) &indice, sizeof(int));
     }
     out_b.close();
     return 1;
@@ -856,6 +882,20 @@ int cin_from_binary_file(char file_name[])
             in_b.read((char *) &code.allBlocks[i]->connectionPath.flsPath[j][1], sizeof(sf::Vertex));
         }
         in_b.read((char *) &code.allBlocks[i]->numberOfPrevs, sizeof(int));
+        for(int j = 1; j <= code.allBlocks[i]->numberOfPrevs; j++)
+        {
+            int indice;
+            in_b.read((char *) &indice, sizeof(int));
+            code.allBlocks[i]->prev[j] = code.allBlocks[indice];
+        }
+        int indice;
+        in_b.read((char *) &indice, sizeof(int));
+        code.allBlocks[i]->next = code.allBlocks[indice];
+        in_b.read((char *) &indice, sizeof(int));
+        code.allBlocks[i]->tru = code.allBlocks[indice];
+        in_b.read((char *) &indice, sizeof(int));
+        code.allBlocks[i]->fls = code.allBlocks[indice];
+
     }
     in_b.close();
     return 1;

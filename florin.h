@@ -82,19 +82,21 @@ int transform_char_to_int_f(char word[])
 
 void transform_int_to_char_f(int value, char word[])
 {
-    int inv = 0;
+    int inv = 0, cnt = 0;
     while(value)
     {
+        cnt++;
         inv = inv * 10 + value % 10;
         value /= 10;
     }
 
     int i = 0;
-    while(inv)
+    while(cnt)
     {
         word[i] = (char)(inv % 10) + 48;
         i++;
         inv /= 10;
+        cnt--;
     }
     word[i] = 0;
 }
@@ -307,19 +309,26 @@ void expresie_postfixata_f(char expresie[], Sir_postfixat postfixat[], int &j)
 int calcul_expresie_f(char expresie[])
 {
 
-    int n = 0, i;
+    int n = 0, i, ok = 0;
 
     Sir_postfixat postfixat[VAR_EXPRESSION_SIZE];
 
-    replace_variable_name_with_value_f(expresie);         ///inlocuieste denumirea variabilelor cu valoarea lor in string.ul de expresie
+    replace_variable_name_with_value_f(expresie);    ///inlocuieste denumirea variabilelor cu valoarea lor
 
-    expresie_postfixata_f(expresie, postfixat, n);          ///formez expresia postfixata ce va contine n 'elemente'
-
-    for(i = 0; i < n; i++)
+    for(int i = 0; i < strlen(expresie); i++)
     {
-        cout << postfixat[i].nume << "-";
+        if(strchr("+-*/", expresie[i]))
+        {
+            ok = 1;
+            break;
+        }
     }
-    cout << "\n\n";
+    if(!ok)
+    {
+        return transform_char_to_int_f(expresie);
+    }
+
+    expresie_postfixata_f(expresie, postfixat, n);   ///formez expresia postfixata ce va contine n 'elemente'
 
     ///#########################################
     ///####CALCULAREA EXPRESIEI POSTFIXATA######
@@ -394,7 +403,7 @@ int calcul_expresie_f(char expresie[])
 
 }
 
-int valoare_adevar_expresie(char expresie[])
+bool valoare_adevar_expresie(char expresie[])
 {
     char stanga[VAR_EXPRESSION_SIZE] = "", dreapta[VAR_EXPRESSION_SIZE] = "";
     int i = 0;
@@ -431,9 +440,6 @@ int valoare_adevar_expresie(char expresie[])
     }
     int val_stanga = calcul_expresie_f(stanga); ///atribui valoarea expresiei din sirul stanga
     int val_dreapta = calcul_expresie_f(dreapta);  ///atribui valoarea expresiei din sirul dreapta
-
-    if (val_stanga == 404)
-        return 404;
 
     switch (operand[0])
     {
@@ -650,7 +656,7 @@ void output_code(LogicBlock *first_block, char code_text[MAX_NUMBER_OF_CODE_LINE
         strcat(code_text[code_line_size], code.vars.var[i].name);
         strcat(code_text[code_line_size], ",");
     }
-    code_text[code_line_size][strlen(code_text[code_line_size]) - 1] = ';';
+    code_text[code_line_size][strlen(code_text[code_line_size]) - 1] = ';';;
 
     /*
     EMPTY_BLOCK 0
@@ -667,15 +673,60 @@ void output_code(LogicBlock *first_block, char code_text[MAX_NUMBER_OF_CODE_LINE
     number_of_tabs++;
     parcurgere_lista_blocuri(step, code_text, code_line_size, number_of_tabs, 0 , 0);
 
+}
 
-    ///AFISARE COD IN CONSOLA
-
-    cout <<"\n\nSource Code: \n\n";
-    for(int i = 1; i <= code_line_size; i++)
+void run_code(LogicBlock *first_block, char out_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int &code_line_size)
+{
+    char copie[MAX_LINE_OF_CODE_SIZE];
+    LogicBlock *step = first_block;
+    golire_code_text_f(out_text);
+    code_line_size = 0;
+    while(step != NULL)
     {
-        cout << code_text[i] << "\n";
-    }
+        switch(step->typeId)
+        {
+            case INPUT_BLOCK:
+                strcpy(copie, step->varFullExpression);
+                code.vars.var[step->varId].value = calcul_expresie_f(step->varFullExpression);
+                strcpy(step->varFullExpression, copie);
+                step = step->next;
+                break;
 
+            case OUTPUT_BLOCK:
+                code_line_size++;
+                char value_char[MAX_VALUE_LENGTH];
+                transform_int_to_char_f(code.vars.var[step->varId].value, value_char);
+                strcpy(out_text[code_line_size], value_char);
+                step = step->next;
+                break;
+
+            case ASSIGN_BLOCK:
+                strcpy(copie, step->varFullExpression);
+                code.vars.var[step->varId].value = calcul_expresie_f(step->varFullExpression);
+                strcpy(step->varFullExpression, copie);
+                step = step->next;
+                break;
+
+            case DECISION_BLOCK:
+                if(valoare_adevar_expresie(step->varFullExpression))
+                {
+                    step = step->tru;
+                }
+                else
+                {
+                    step = step->fls;
+                }
+                break;
+
+            case STOP_BLOCK:
+                step = step->next;
+                break;
+
+            default:
+                step = step->next;
+                break;
+        }
+    }
 }
 
 int file_count()
@@ -722,6 +773,7 @@ int cout_to_binary_file()
 
         out_b.write((char *) &code.allBlocks[i]->block, sizeof(sf::RectangleShape));
         out_b.write((char *) &code.allBlocks[i]->blockTitle, sizeof(sf::Text));
+        out_b.write((char *) &code.allBlocks[i]->blockExpression, sizeof(sf::Text));
         out_b.write((char *) &code.allBlocks[i]->blockPos, sizeof(sf::Vector2f));
         out_b.write((char *) &code.allBlocks[i]->typeId, sizeof(int));
         out_b.write((char *) &code.allBlocks[i]->varId, sizeof(int));
@@ -757,6 +809,7 @@ int cin_from_binary_file(char file_name[])
     {
         in_b.read((char *) &code.allBlocks[i]->block, sizeof(sf::RectangleShape));
         in_b.read((char *) &code.allBlocks[i]->blockTitle, sizeof(sf::Text));
+        in_b.read((char *) &code.allBlocks[i]->blockExpression, sizeof(sf::Text));
         in_b.read((char *) &code.allBlocks[i]->blockPos, sizeof(sf::Vector2f));
         in_b.read((char *) &code.allBlocks[i]->typeId, sizeof(int));
         in_b.read((char *) &code.allBlocks[i]->varId, sizeof(int));

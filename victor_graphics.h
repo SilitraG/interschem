@@ -621,11 +621,12 @@ void appOutputButtonIsPressedHandler(int buttonId) {
         //codeIterator(code.first); // testare legaturi
         int numberOfLines=0;
         char codeOutput[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]={NULL};
+       /// run_code(code.first, codeOutput, numberOfLines);
         varTester(numberOfLines, codeOutput);
         updateAppOutput(numberOfLines, codeOutput);
     } else { // Generate Code Button
 
-        char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]; ///indexat de la 1
+        char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE] ={NULL}; ///indexat de la 1
         int code_line_size;
         output_code(code.first, code_text, code_line_size); ///codul ce urmeaza a fi afisat in interfata grafica se regaseste in code_text[][]
         updateAppOutput(code_line_size, code_text);

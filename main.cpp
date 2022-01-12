@@ -124,10 +124,10 @@ struct LogicBlock {
     sf::Vector2f blockPos; //Position of the block
     int typeId=EMPTY_BLOCK; //Block type (check def)
     int varId=-1; //Variable ID for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK
-    char varFullExpression[VAR_EXPRESSION_SIZE+1]={NULL}; //Full math expression for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK or DECISION_BLOCK condition
+    char varFullExpression[VAR_EXPRESSION_SIZE]={NULL}; //Full math expression for INPUT_BLOCK, ASSIGN_BLOCK and OUTPUT_BLOCK or DECISION_BLOCK condition
     BlockConnectionPath connectionPath; //All the slave graphical connections
     int numberOfPrevs=0;
-    LogicBlock *prev[MAX_NUMBER_OF_BLOCKS+1]={NULL}; //All previous blocks
+    LogicBlock *prev[MAX_NUMBER_OF_BLOCKS]={NULL}; //All previous blocks
     LogicBlock *next=NULL; //Next block
     LogicBlock *tru=NULL; //Next block if true (for DECISION_BLOCK)
     LogicBlock *fls=NULL; //Next block if false (for DECISION_BLOCK)
@@ -174,11 +174,11 @@ struct AppOutput {
     sf::RectangleShape appOutputArea;
     sf::RectangleShape appOutputButton[3];
     sf::Text appOutputButtonText[3];
-    sf::Text codeOutput[MAX_NUMBER_OF_CODE_LINE+1];
+    sf::Text codeOutput[MAX_NUMBER_OF_CODE_LINE];
 };
 
 struct UserInput {
-    int inputIsActive=false; // id of the block or false
+    int inputIsActive=false; // id of the block, -1 for import, or false
     int activeField=1; // id of the active input field
     int numberOfFields=1;
     sf::RectangleShape userInputBackground;
@@ -211,13 +211,13 @@ struct Variable {
 
 struct Variables {
     int varsNumber=0; //Total number of variables
-    Variable var[MAX_NUMBER_OF_VARS+1];
+    Variable var[MAX_NUMBER_OF_VARS];
 };
 
 struct BlocksList {
     Variables vars; //The vars created and used by the code
     int numberOfBlocks = 0;
-    LogicBlock *allBlocks[MAX_NUMBER_OF_BLOCKS+1]= {NULL}; //All blocks in adding order
+    LogicBlock *allBlocks[MAX_NUMBER_OF_BLOCKS]= {NULL}; //All blocks in adding order
     LogicBlock *first=NULL; //First block of the code
     LogicBlock *last=NULL; //Last block of the code
     WindowProps appProps; //Props for graphics

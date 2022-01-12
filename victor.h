@@ -344,12 +344,18 @@ void codeIterator(LogicBlock *block) {
 }
 
 //Shows the used variables
-void varTester() {
-    cout << '\n';
+void varTester(int &numberOfLines, char codeOutput[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]) {
+    //cout << '\n';
+    char varValue[51];
     for(int i = 1; i <= code.vars.varsNumber; i++) {
-        cout << code.vars.var[i].name << ' ' << code.vars.var[i].value << ' ';
+        numberOfLines++;
+        strcat(codeOutput[numberOfLines], code.vars.var[i].name);
+        strcat(codeOutput[numberOfLines], "  ");
+        itoa(code.vars.var[i].value, varValue, 10);
+        strcat(codeOutput[numberOfLines], varValue);
+        //cout << code.vars.var[i].name << ' ' << code.vars.var[i].value << ' ';
     }
-    cout << '\n';
+    //cout << '\n';
 }
 
 //Console code input

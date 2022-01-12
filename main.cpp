@@ -75,7 +75,10 @@
 #define APP_MENU_POS_X 0
 #define APP_MENU_POS_Y 0
 #define APP_MENU_COLOR sf::Color(169,169,169)
-#define NUMBER_OF_APP_MENU_BUTTONS 5
+#define NUMBER_OF_APP_MENU_BUTTONS 3
+#define APP_MENU_BUTTON_SIZE_X 150
+#define APP_MENU_BUTTON_SIZE_Y 50
+#define APP_MENU_BUTTON_COLOR sf::Color::White
 
 //User input
 #define USER_INPUT_SIZE_X 600

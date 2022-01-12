@@ -119,6 +119,9 @@ void appWindow()
                         if(mouseIsOnAppOutputButton() != -1) {
                             appOutputButtonIsPressedHandler(mouseIsOnAppOutputButton());
                         }
+                        if(mouseIsOnAppMenuButton() != -1) {
+                            menuButtonIsPressedHandler(mouseIsOnAppMenuButton());
+                        }
                     } else {
                         if(mouseIsOnUserInputField() != -1) {
                             code.appProps.userInput.activeField = mouseIsOnUserInputField();
@@ -158,7 +161,6 @@ void appWindow()
         }
         code.appProps.mouseIsMoving = false;
         window.clear(sf::Color::WINDOW_COLOR);
-
         /// DRAWING ZONE ///
         displayAppMenu(window);
         displayAppOutput(window);
@@ -166,6 +168,7 @@ void appWindow()
         displayAllLogicBlocks(window);
         displayBlockMenu(window);
         displayUserInput(window);
+        displayAppTitle(window, arialMedium);
         /// END OF DRAWING ZONE ///
 
         window.display();

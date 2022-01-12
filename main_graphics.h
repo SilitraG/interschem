@@ -20,40 +20,6 @@ void appWindow()
     drawNewBlock(sf::Vector2f(250, 230), DECISION_BLOCK, arialMedium);
 
 
-    ///############################################
-    ///############# TESTARE FUNCTII ##############
-    ///############################################
-    /*
-    int j = 1;
-    char chr_var[] = "a";
-    int int_var = 4;
-    for(int i = 1; i <= code.numberOfBlocks; i++)
-    {
-        if(code.allBlocks[i]->typeId == INPUT_BLOCK  || code.allBlocks[i]->typeId == OUTPUT_BLOCK)
-        {
-            code.allBlocks[i]->varId = j;
-            code.vars.varsNumber++;
-            strcpy(code.vars.var[j].name, chr_var);
-            j++;
-            chr_var[0]++;
-        }
-        else
-        {
-            if(code.allBlocks[i]->typeId == ASSIGN_BLOCK)
-            {
-                code.allBlocks[i]->varId = j;
-                code.vars.varsNumber++;
-                strcpy(code.vars.var[j].name, "bej");
-                code.vars.var[j].value = 68;
-                j++;
-                chr_var[0]++;
-            }
-        }
-    }
-    */
-
-
-
     drawAppMenu(arialMedium);
     drawAppOutput(arialMedium);
     drawAddBlockMenu(arialMedium);

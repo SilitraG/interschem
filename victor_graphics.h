@@ -672,9 +672,9 @@ void blockMenuButtonIsPressedHandler(int buttonId, sf::Font &textFont) {
 
 void appOutputButtonIsPressedHandler(int buttonId) {
     if(buttonId == 1) { // Run Code Button
-        codeIterator(code.first); // testare legaturi
         int numberOfLines=0;
         char codeOutput[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]={NULL};
+        run_code(code.first, codeOutput, numberOfLines);
         varTester(numberOfLines, codeOutput);
         updateAppOutput(numberOfLines, codeOutput);
     } else { // Generate Code Button
@@ -683,18 +683,6 @@ void appOutputButtonIsPressedHandler(int buttonId) {
         int code_line_size;
         output_code(code.first, code_text, code_line_size); ///codul ce urmeaza a fi afisat in interfata grafica se regaseste in code_text[][]
         updateAppOutput(code_line_size, code_text);
-        /// TESTARE FUNCTIE CITIRE DIN FISIER BINAR
-        /*
-        for(int i = 1; i <= code.numberOfBlocks; i++)
-        {
-            if(code.allBlocks[i]->typeId == ASSIGN_BLOCK || code.allBlocks[i]->typeId == INPUT_BLOCK)
-                strcpy(code.allBlocks[4]->varFullExpression, "EXPRESIE INAINTE DE CITIRE");
-        }
-
-        cin_from_binary_file("interschem_0003");
-        for(int i = 1; i <= code.numberOfBlocks; i++)
-            cout << code.allBlocks[i]->varFullExpression << "!!!!!!!!!!!!!\n";
-            */
     }
 }
 

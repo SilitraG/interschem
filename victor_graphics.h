@@ -74,6 +74,7 @@ int mouseIsOnUserInputButton() {
         }
     }
     return -1;
+
 }
 
 //Input: -
@@ -84,6 +85,16 @@ int mouseIsOnUserInputField() {
             if(mouseIsOnItem(code.appProps.userInput.userInputField[i].getPosition(), code.appProps.userInput.userInputField[i].getSize())) {
                 return i;
             }
+        }
+    }
+    return -1;
+
+}
+
+int mouseIsOnAppMenuButton() {
+    for(int i = 1; i <= NUMBER_OF_APP_MENU_BUTTONS; i++) {
+        if(mouseIsOnItem(code.appProps.appMenu.appMenuButton[i].getPosition(), code.appProps.appMenu.appMenuButton[i].getSize())) {
+            return i;
         }
     }
     return -1;
@@ -145,10 +156,45 @@ void deleteBlock(int blockId) {
 
 }
 
+void deleteAllBlocks() {
+    for(int i = 1; i <= code.numberOfBlocks; i++) {
+        if(code.allBlocks[i]->typeId != START_BLOCK) {
+            deleteBlock(i);
+        }
+    }
+    code.numberOfBlocks = 1;
+    for(int i = 1; i <= code.vars.varsNumber; i++) {
+        code.vars.var[i].name[0]=NULL;
+        code.vars.var[i].value=0;
+    }
+    code.vars.varsNumber = 0;
+
+}
+
 void drawAppMenu(sf::Font &textFont) {
     code.appProps.appMenu.appMenuBackground.setPosition(sf::Vector2f(APP_MENU_POS_X, APP_MENU_POS_Y));
     code.appProps.appMenu.appMenuBackground.setSize(sf::Vector2f(APP_MENU_SIZE_X, APP_MENU_SIZE_Y));
     code.appProps.appMenu.appMenuBackground.setFillColor(APP_MENU_COLOR);
+
+    code.appProps.appMenu.appMenuButton[1].setPosition(sf::Vector2f(ADD_BLOCK_MENU_SIZE_X+APP_OUTPUT_BORDER_THICKNESS, APP_OUTPUT_BORDER_THICKNESS));
+    code.appProps.appMenu.appMenuButton[2].setPosition(sf::Vector2f(ADD_BLOCK_MENU_SIZE_X+2*APP_OUTPUT_BORDER_THICKNESS+APP_MENU_BUTTON_SIZE_X, APP_OUTPUT_BORDER_THICKNESS));
+    code.appProps.appMenu.appMenuButton[3].setPosition(sf::Vector2f(APP_OUTPUT_POS_X-APP_MENU_BUTTON_SIZE_X, APP_OUTPUT_BORDER_THICKNESS));
+
+    for(int i = 1; i <= NUMBER_OF_APP_MENU_BUTTONS; i++) {
+        code.appProps.appMenu.appMenuButton[i].setSize(sf::Vector2f(APP_MENU_BUTTON_SIZE_X, APP_MENU_BUTTON_SIZE_Y));
+        code.appProps.appMenu.appMenuButton[i].setFillColor(APP_MENU_BUTTON_COLOR);
+        code.appProps.appMenu.appMenuButton[i].setOutlineThickness(APP_OUTPUT_BORDER_THICKNESS);
+        code.appProps.appMenu.appMenuButton[i].setOutlineColor(APP_OUTPUT_COLOR);
+
+        code.appProps.appMenu.appMenuButtonText[i].setPosition(sf::Vector2f(code.appProps.appMenu.appMenuButton[i].getPosition().x, code.appProps.appMenu.appMenuButton[i].getPosition().y));
+        code.appProps.appMenu.appMenuButtonText[i].setFillColor(APP_OUTPUT_BUTTON_TEXT_COLOR);
+        code.appProps.appMenu.appMenuButtonText[i].setFont(textFont);
+        code.appProps.appMenu.appMenuButtonText[i].setStyle(sf::Text::Bold);
+        code.appProps.appMenu.appMenuButtonText[i].setCharacterSize(APP_OUTPUT_BUTTON_TEXT_SIZE);
+    }
+        code.appProps.appMenu.appMenuButtonText[1].setString("IMPORT CODE");
+        code.appProps.appMenu.appMenuButtonText[2].setString("EXPORT CODE");
+        code.appProps.appMenu.appMenuButtonText[3].setString("CLEAR BLOCKS");
 
 }
 
@@ -572,9 +618,11 @@ void blockMenuButtonIsPressedHandler(int buttonId, sf::Font &textFont) {
 
 void appOutputButtonIsPressedHandler(int buttonId) {
     if(buttonId == 1) { // Run Code Button
-        codeIterator(code.first);
-        varTester();
-        cout << '\n';
+        //codeIterator(code.first); // testare legaturi
+        int numberOfLines=0;
+        char codeOutput[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]={NULL};
+        varTester(numberOfLines, codeOutput);
+        updateAppOutput(numberOfLines, codeOutput);
     } else { // Generate Code Button
 
         char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]; ///indexat de la 1
@@ -637,6 +685,17 @@ void userInputButtonIsPressedHandler(int buttonId) {
     code.appProps.userInput.userInputText[1].setString("");
     code.appProps.userInput.userInputText[2].setString("");
     code.appProps.userInput.inputIsActive = false;
+
+}
+
+void menuButtonIsPressedHandler(int buttonId) {
+    if(buttonId == 1) { // Import code
+
+    } else if(buttonId == 2) { // Export code
+
+    } else if(buttonId == 3) { // Clear blocks
+        deleteAllBlocks();
+    }
 
 }
 
@@ -763,6 +822,10 @@ void displayAppOutput(sf::RenderWindow &window) {
 
 void displayAppMenu(sf::RenderWindow &window) {
     window.draw(code.appProps.appMenu.appMenuBackground);
+    for(int i = 1; i <= NUMBER_OF_APP_MENU_BUTTONS; i++) {
+        window.draw(code.appProps.appMenu.appMenuButton[i]);
+        window.draw(code.appProps.appMenu.appMenuButtonText[i]);
+    }
 
 }
 
@@ -834,4 +897,14 @@ void displayUserInput(sf::RenderWindow &window) {
     }
 }
 
+void displayAppTitle(sf::RenderWindow &window, sf::Font &textFont) {
+    sf::Text appTitle;
+    appTitle.setString("INTERSCHEM");
+    appTitle.setFont(textFont);
+    appTitle.setCharacterSize(45);
+    appTitle.setFillColor(sf::Color::Red);
+    appTitle.setPosition(sf::Vector2f(465, 2));
+    appTitle.setStyle(sf::Text::Bold);
+    window.draw(appTitle);
+}
 /// /////////// END OF DISPLAY ////////////////////////

@@ -852,6 +852,8 @@ int cin_from_binary_file(char file_name[])
 
     for(int i = 1; i <= code.numberOfBlocks; i++)
     {
+        code.allBlocks[i] = new LogicBlock;
+        
         in_b.read((char *) &code.allBlocks[i]->block, sizeof(sf::RectangleShape));
         in_b.read((char *) &code.allBlocks[i]->blockTitle, sizeof(sf::Text));
         in_b.read((char *) &code.allBlocks[i]->blockExpression, sizeof(sf::Text));

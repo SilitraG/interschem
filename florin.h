@@ -512,6 +512,7 @@ void parcurgere_lista_blocuri(LogicBlock *step, char code_text[MAX_NUMBER_OF_COD
                 implementare_tab_f(code_text, number_of_tabs, code_line_size);
                 strcat(code_text[code_line_size], "cout << ");
                 strcat(code_text[code_line_size], code.vars.var[step->varId].name);
+                strcat(code_text[code_line_size], " << \"\\n\"");
                 strcat(code_text[code_line_size], ";");
                 step = step->next;
                 break;
@@ -778,7 +779,27 @@ int cout_to_binary_file()
         out_b.write((char *) &code.allBlocks[i]->typeId, sizeof(int));
         out_b.write((char *) &code.allBlocks[i]->varId, sizeof(int));
         out_b.write((char *) &code.allBlocks[i]->varFullExpression, sizeof(char));
-        out_b.write((char *) &code.allBlocks[i]->connectionPath, sizeof(BlockConnectionPath));
+        out_b.write((char *) &code.allBlocks[i]->connectionPath.hasConnection, sizeof(bool));
+        out_b.write((char *) &code.allBlocks[i]->connectionPath.numberOfLinesNext, sizeof(int));
+        for(int j = 1; j <= code.allBlocks[i]->connectionPath.numberOfLinesNext; j++)
+        {
+            out_b.write((char *) &code.allBlocks[i]->connectionPath.nextPath[j][0], sizeof(sf::Vertex));
+            out_b.write((char *) &code.allBlocks[i]->connectionPath.nextPath[j][1], sizeof(sf::Vertex));
+        }
+
+        out_b.write((char *) &code.allBlocks[i]->connectionPath.numberOfLinesTru, sizeof(int));
+        for(int j = 1; j <= code.allBlocks[i]->connectionPath.numberOfLinesTru; j++)
+        {
+            out_b.write((char *) &code.allBlocks[i]->connectionPath.truPath[j][0], sizeof(sf::Vertex));
+            out_b.write((char *) &code.allBlocks[i]->connectionPath.truPath[j][1], sizeof(sf::Vertex));
+        }
+
+        out_b.write((char *) &code.allBlocks[i]->connectionPath.numberOfLinesFls, sizeof(int));
+        for(int j = 1; j <= code.allBlocks[i]->connectionPath.numberOfLinesFls; j++)
+        {
+            out_b.write((char *) &code.allBlocks[i]->connectionPath.flsPath[j][0], sizeof(sf::Vertex));
+            out_b.write((char *) &code.allBlocks[i]->connectionPath.flsPath[j][1], sizeof(sf::Vertex));
+        }
         out_b.write((char *) &code.allBlocks[i]->numberOfPrevs, sizeof(int));
     }
     out_b.close();
@@ -798,8 +819,6 @@ int cin_from_binary_file(char file_name[])
     in_b.read((char *) &code.vars.varsNumber, sizeof(int));
     in_b.read((char *) &code.numberOfBlocks, sizeof(int));
 
-    cout << code.vars.varsNumber << "AICI a mers\n";
-
     for(int i = 1; i <= code.vars.varsNumber; i++)
     {
         in_b.read((char *) &code.vars.var[i], sizeof(Variable));
@@ -814,7 +833,28 @@ int cin_from_binary_file(char file_name[])
         in_b.read((char *) &code.allBlocks[i]->typeId, sizeof(int));
         in_b.read((char *) &code.allBlocks[i]->varId, sizeof(int));
         in_b.read((char *) &code.allBlocks[i]->varFullExpression, sizeof(char));
-        in_b.read((char *) &code.allBlocks[i]->connectionPath, sizeof(BlockConnectionPath));
+        in_b.read((char *) &code.allBlocks[i]->connectionPath.hasConnection, sizeof(bool));
+
+        in_b.read((char *) &code.allBlocks[i]->connectionPath.numberOfLinesNext, sizeof(int));
+        for(int j = 1; j <= code.allBlocks[i]->connectionPath.numberOfLinesNext; j++)
+        {
+            in_b.read((char *) &code.allBlocks[i]->connectionPath.nextPath[j][0], sizeof(sf::Vertex));
+            in_b.read((char *) &code.allBlocks[i]->connectionPath.nextPath[j][1], sizeof(sf::Vertex));
+        }
+
+        in_b.read((char *) &code.allBlocks[i]->connectionPath.numberOfLinesTru, sizeof(int));
+        for(int j = 1; j <= code.allBlocks[i]->connectionPath.numberOfLinesTru; j++)
+        {
+            in_b.read((char *) &code.allBlocks[i]->connectionPath.truPath[j][0], sizeof(sf::Vertex));
+            in_b.read((char *) &code.allBlocks[i]->connectionPath.truPath[j][1], sizeof(sf::Vertex));
+        }
+
+        in_b.read((char *) &code.allBlocks[i]->connectionPath.numberOfLinesFls, sizeof(int));
+        for(int j = 1; j <= code.allBlocks[i]->connectionPath.numberOfLinesFls; j++)
+        {
+            in_b.read((char *) &code.allBlocks[i]->connectionPath.flsPath[j][0], sizeof(sf::Vertex));
+            in_b.read((char *) &code.allBlocks[i]->connectionPath.flsPath[j][1], sizeof(sf::Vertex));
+        }
         in_b.read((char *) &code.allBlocks[i]->numberOfPrevs, sizeof(int));
     }
     in_b.close();

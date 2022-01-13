@@ -13,12 +13,9 @@ void appWindow()
     }
 
     drawNewBlock(sf::Vector2f(200, 100), START_BLOCK, arialMedium);
-
     drawAppMenu(arialMedium);
     drawAppOutput(arialMedium);
     drawAddBlockMenu(arialMedium);
-
-    //cout << code.allBlocks[2]->blockTitle.getLocalBounds().width; //for text centering
 
     while (window.isOpen())
     {
@@ -116,7 +113,6 @@ void appWindow()
             }
             else if(mouseIsOnBlock() != -1) {
                 moveBlock(mouseIsOnBlock());
-                //rearrangeBlocks(code.appProps.block.blockIsBeingMoved);
             }
         }
         code.appProps.mouseIsMoving = false;

@@ -4,6 +4,7 @@
 #include <sstream>
 #include<string>
 #include <iomanip>
+#include <SFML/Graphics.hpp>
 
 using namespace std;
 
@@ -307,7 +308,7 @@ void expresie_postfixata_f(char expresie[], Sir_postfixat postfixat[], int &j)
 
 }
 
-int calcul_expresie_f(char expresie[])
+int calcul_expresie_f(char expresie[], int &error_catcher)
 {
 
     int n = 0, i, ok = 0;
@@ -341,6 +342,7 @@ int calcul_expresie_f(char expresie[])
     Nod_postfixat *stiva = new Nod_postfixat;
 
     int valoare = 0;
+    error_catcher = 0;
     for(i = 0; i < n; i++)
     {
         if(strchr("0123456789", postfixat[i].nume[0])!=0)
@@ -378,6 +380,7 @@ int calcul_expresie_f(char expresie[])
                     catch (int error)
                     {
                         cout << "\nDivide by zero error encountered\n";
+                        error_catcher = 1;
                     }
                     break;
 
@@ -406,7 +409,7 @@ int calcul_expresie_f(char expresie[])
 
 }
 
-bool valoare_adevar_expresie(char expresie[])
+bool valoare_adevar_expresie(char expresie[], int &error_catcher)
 {
     char stanga[VAR_EXPRESSION_SIZE] = "", dreapta[VAR_EXPRESSION_SIZE] = "";
     int i = 0;
@@ -441,8 +444,8 @@ bool valoare_adevar_expresie(char expresie[])
         }
         i++;
     }
-    int val_stanga = calcul_expresie_f(stanga); ///atribui valoarea expresiei din sirul stanga
-    int val_dreapta = calcul_expresie_f(dreapta);  ///atribui valoarea expresiei din sirul dreapta
+    int val_stanga = calcul_expresie_f(stanga, error_catcher); ///atribui valoarea expresiei din sirul stanga
+    int val_dreapta = calcul_expresie_f(dreapta, error_catcher);  ///atribui valoarea expresiei din sirul dreapta
 
     switch (operand[0])
     {
@@ -679,9 +682,22 @@ void output_code(LogicBlock *first_block, char code_text[MAX_NUMBER_OF_CODE_LINE
 
 }
 
-void run_code(LogicBlock *first_block, char out_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int &code_line_size)
+int search_block_in_allBlocks(LogicBlock *cautat)
+{
+    for(int i = 1; i <= code.numberOfBlocks; i++)
+    {
+        if(code.allBlocks[i] == cautat)
+        {
+            return i;
+        }
+    }
+    return NULL;
+}
+
+int run_code(LogicBlock *first_block, char out_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int &code_line_size)
 {
     char copie[MAX_LINE_OF_CODE_SIZE];
+    int error_catcher = 0;
     LogicBlock *step = first_block;
     golire_code_text_f(out_text);
     code_line_size = 0;
@@ -691,7 +707,11 @@ void run_code(LogicBlock *first_block, char out_text[MAX_NUMBER_OF_CODE_LINE][MA
         {
             case INPUT_BLOCK:
                 strcpy(copie, step->varFullExpression);
-                code.vars.var[step->varId].value = calcul_expresie_f(step->varFullExpression);
+                code.vars.var[step->varId].value = calcul_expresie_f(step->varFullExpression, error_catcher);
+                if(error_catcher)
+                {
+                    return search_block_in_allBlocks(step);
+                }
                 strcpy(step->varFullExpression, copie);
                 step = step->next;
                 break;
@@ -706,13 +726,22 @@ void run_code(LogicBlock *first_block, char out_text[MAX_NUMBER_OF_CODE_LINE][MA
 
             case ASSIGN_BLOCK:
                 strcpy(copie, step->varFullExpression);
-                code.vars.var[step->varId].value = calcul_expresie_f(step->varFullExpression);
+                code.vars.var[step->varId].value = calcul_expresie_f(step->varFullExpression, error_catcher);
+                if(error_catcher)
+                {
+                    return search_block_in_allBlocks(step);
+                }
                 strcpy(step->varFullExpression, copie);
                 step = step->next;
                 break;
 
             case DECISION_BLOCK:
-                if(valoare_adevar_expresie(step->varFullExpression))
+                valoare_adevar_expresie(step->varFullExpression, error_catcher);
+                if(error_catcher)
+                {
+                    return search_block_in_allBlocks(step);
+                }
+                if(valoare_adevar_expresie(step->varFullExpression, error_catcher))
                 {
                     step = step->tru;
                 }
@@ -731,6 +760,7 @@ void run_code(LogicBlock *first_block, char out_text[MAX_NUMBER_OF_CODE_LINE][MA
                 break;
         }
     }
+    return -1;
 }
 
 int file_count()
@@ -748,18 +778,6 @@ int file_count()
         filecount++;
     }
     return filecount;
-}
-
-int search_block_in_allBlocks(LogicBlock *cautat)
-{
-    for(int i = 1; i <= code.numberOfBlocks; i++)
-    {
-        if(code.allBlocks[i] == cautat)
-        {
-            return i;
-        }
-    }
-    return NULL;
 }
 
 int cout_to_binary_file()
@@ -785,8 +803,6 @@ int cout_to_binary_file()
 
     for(int i = 1; i <= code.numberOfBlocks; i++)
     {
-        ///out_b.write((char *) &code.allBlocks[i], sizeof(LogicBlock));
-
         out_b.write((char *) &code.allBlocks[i]->block, sizeof(sf::RectangleShape));
         out_b.write((char *) &code.allBlocks[i]->blockTitle, sizeof(sf::Text));
         out_b.write((char *) &code.allBlocks[i]->blockExpression, sizeof(sf::Text));
@@ -852,8 +868,8 @@ int cin_from_binary_file(char file_name[])
 
     for(int i = 1; i <= code.numberOfBlocks; i++)
     {
-        code.allBlocks[i] = new LogicBlock;
-        
+        cout << i << "\n";
+        sf::RectangleShape block;
         in_b.read((char *) &code.allBlocks[i]->block, sizeof(sf::RectangleShape));
         in_b.read((char *) &code.allBlocks[i]->blockTitle, sizeof(sf::Text));
         in_b.read((char *) &code.allBlocks[i]->blockExpression, sizeof(sf::Text));
@@ -898,6 +914,10 @@ int cin_from_binary_file(char file_name[])
         in_b.read((char *) &indice, sizeof(int));
         code.allBlocks[i]->fls = code.allBlocks[indice];
 
+        if(i == 1)
+        {
+            code.first = code.allBlocks[i];
+        }
     }
     in_b.close();
     return 1;

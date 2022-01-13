@@ -74,7 +74,7 @@ void appWindow()
                             blockMenuButtonIsPressedHandler(mouseIsOnBlockMenuButton(), arialMedium);
                         }
                         if(mouseIsOnAppOutputButton() != -1) {
-                            appOutputButtonIsPressedHandler(mouseIsOnAppOutputButton());
+                            appOutputButtonIsPressedHandler(mouseIsOnAppOutputButton(), arialMedium);
                         }
                         if(mouseIsOnAppMenuButton() != -1) {
                             menuButtonIsPressedHandler(mouseIsOnAppMenuButton(), arialMedium);

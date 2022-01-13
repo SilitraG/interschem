@@ -71,7 +71,7 @@ void afisare_f(Nod *p)
     }
 }
 
-int transform_char_to_int_f(char word[])
+int transform_char_to_int_f(char word[])    ///transforma un char intr-un numar pe care il returneaza ulterior
 {
     int value = 0;
     for(int i = 0; i < strlen(word); i++)
@@ -81,7 +81,7 @@ int transform_char_to_int_f(char word[])
     return value;
 }
 
-void transform_int_to_char_f(int value, char word[])
+void transform_int_to_char_f(int value, char word[])    ///transforma un numar intr-un sir de caractere pe care il furnizeaza
 {
     int inv = 0, cnt = 0;
     while(value)
@@ -102,7 +102,7 @@ void transform_int_to_char_f(int value, char word[])
     word[i] = 0;
 }
 
-bool is_letter_f(char c)
+bool is_letter_f(char c)    ///return true daca c este litera
 {
     if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
     {
@@ -111,7 +111,7 @@ bool is_letter_f(char c)
     return false;
 }
 
-void replace_variable_name_with_value_f(char expresie[])
+void replace_variable_name_with_value_f(char expresie[]) ///inlocuieste variabilele cu valorile lor ex b + c -> 30 + 10
 {
     char aux[VAR_EXPRESSION_SIZE];
     for(int i = 0; i < strlen(expresie); i++)
@@ -148,7 +148,7 @@ void replace_variable_name_with_value_f(char expresie[])
 
 }
 
-bool is_while_f(LogicBlock *first)
+bool is_while_f(LogicBlock *first)  ///return true daca decision.ul este while sau false daca este if/ if else
 {
     first = first->tru;
 
@@ -170,7 +170,7 @@ bool is_while_f(LogicBlock *first)
     return false;
 }
 
-int number_of_block_where_IFblock_stop(LogicBlock *step_r, LogicBlock *step_l)
+int number_of_block_where_IFblock_stop(LogicBlock *step_r, LogicBlock *step_l) ///return in cnt cate blockuri contine decizia if/else
 {
     LogicBlock *first_r = step_r;
 
@@ -203,7 +203,7 @@ int number_of_block_where_IFblock_stop(LogicBlock *step_r, LogicBlock *step_l)
 
 }
 
-void golire_valori_negative(LogicBlock *step)
+void golire_valori_negative(LogicBlock *step) /// repara valorile transformate in -1 la functia anterioara
 {
     if(step->typeId < 0)
         step->typeId *= (-1);
@@ -219,7 +219,7 @@ void golire_valori_negative(LogicBlock *step)
     }
 }
 
-void implementare_tab_f(char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int number_of_tabs, int code_line_size)
+void implementare_tab_f(char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int number_of_tabs, int code_line_size) ///indexeaza tab.ul/tab.urile la inceputul liniei de cod
 {
     for(int i = 0; i < number_of_tabs; i++)
     {
@@ -228,7 +228,7 @@ void implementare_tab_f(char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE
 
 }
 
-void golire_code_text_f(char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE])
+void golire_code_text_f(char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]) ///goleste campurile text din vectorul de cuvinte care urmeaza sa retina codul
 {
     for(int i = 1; strlen(code_text[i]) != 0; i++)
     {
@@ -236,7 +236,7 @@ void golire_code_text_f(char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE
     }
 }
 
-void eliminare_spatii_expresie(char expresie[])
+void eliminare_spatii_expresie(char expresie[])   ///elimina spatiile din expresia ce urmeaza a fi calculata
 {
     for(int i=0; i < strlen(expresie); i++)
     {
@@ -247,7 +247,7 @@ void eliminare_spatii_expresie(char expresie[])
     }
 }
 
-void expresie_postfixata_f(char expresie[], Sir_postfixat postfixat[], int &j)
+void expresie_postfixata_f(char expresie[], Sir_postfixat postfixat[], int &j) ///calculeaza expresia postfixata de pe expresia initiala
 {
     int i;
 
@@ -308,7 +308,7 @@ void expresie_postfixata_f(char expresie[], Sir_postfixat postfixat[], int &j)
 
 }
 
-int calcul_expresie_f(char expresie[], int &error_catcher)
+int calcul_expresie_f(char expresie[], int &error_catcher) ///calculeaza expresia
 {
 
     int n = 0, i, ok = 0;
@@ -409,9 +409,9 @@ int calcul_expresie_f(char expresie[], int &error_catcher)
 
 }
 
-bool valoare_adevar_expresie(char expresie[], int &error_catcher)
+bool valoare_adevar_expresie(char expresie[], int &error_catcher) ///verifica valoarea de adevar a unei expresii
 {
-    char stanga[VAR_EXPRESSION_SIZE] = "", dreapta[VAR_EXPRESSION_SIZE] = "";
+    char stanga[VAR_EXPRESSION_SIZE] = "", dreapta[VAR_EXPRESSION_SIZE] = ""; ///separa expresia in functie de operand == != <= >= < >, stanga si dreapta
     int i = 0;
     int poz_stanga = 0, poz_dreapta = 0, poz_operand = 0;
     while(strchr("<>=!",expresie[i]) == 0)
@@ -494,6 +494,7 @@ bool valoare_adevar_expresie(char expresie[], int &error_catcher)
 
 void parcurgere_lista_blocuri(LogicBlock *step, char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int &code_line_size, int &number_of_tabs, int number_of_IFdecisions_accesed, int number_of_blocks_inside_IFdecision)
 {
+    ///parcurge lista de blocuri incepand cu first block pentru a genera codul c++ corespunzator
     while(step != NULL)
     {
         switch(step->typeId)
@@ -644,7 +645,7 @@ void parcurgere_lista_blocuri(LogicBlock *step, char code_text[MAX_NUMBER_OF_COD
 
 void output_code(LogicBlock *first_block, char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int &code_line_size)
 {
-
+    ///initiaza vectorul de cuvinte in care urmeaza sa se copieze codul generat de functia anterioara
     golire_code_text_f(code_text);
 
     int number_of_tabs = 0;
@@ -682,7 +683,7 @@ void output_code(LogicBlock *first_block, char code_text[MAX_NUMBER_OF_CODE_LINE
 
 }
 
-int search_block_in_allBlocks(LogicBlock *cautat)
+int search_block_in_allBlocks(LogicBlock *cautat) ///cauta parametrul de tip LogicBlock in vectorul de blocuri returnand indicele acestuia cand il gaseste
 {
     for(int i = 1; i <= code.numberOfBlocks; i++)
     {
@@ -696,6 +697,7 @@ int search_block_in_allBlocks(LogicBlock *cautat)
 
 int run_code(LogicBlock *first_block, char out_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE], int &code_line_size)
 {
+    ///functie ce parcurge codul pentru a realiza build and run.ul
     char copie[MAX_LINE_OF_CODE_SIZE];
     int error_catcher = 0;
     LogicBlock *step = first_block;
@@ -763,7 +765,7 @@ int run_code(LogicBlock *first_block, char out_text[MAX_NUMBER_OF_CODE_LINE][MAX
     return -1;
 }
 
-int file_count()
+int file_count() ///returneaza cate alte fisiere cu denumirea interschem_abcd exista
 {
     int filecount = 0;
     while(1)
@@ -780,7 +782,7 @@ int file_count()
     return filecount;
 }
 
-int cout_to_binary_file()
+int cout_to_binary_file() ///salveaza continutul intr.un file binar
 {
     int filecount = file_count();
 
@@ -848,7 +850,7 @@ int cout_to_binary_file()
     return 1;
 }
 
-int cin_from_binary_file(char file_name[])
+int cin_from_binary_file(char file_name[]) ///citeste continutul dintr.un file binar
 {
     stringstream filename;
     filename << "./saves/" << file_name << ".dat";

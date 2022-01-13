@@ -232,39 +232,7 @@ struct BlocksList {
 
 int main()
 {
-
-    ///////////////// TESTE VICTOR /////////////////
-    //codeCreator();
-    //codeIterator(code.first);
-    //varTester();
     appWindow();
 
-    ///////////////// TESTE FLORIN /////////////////
-    /////verificare functie postfixat
-    /*
-    char s[256];
-    strcpy(s,"30+2*(10+5)+7");
-    ///Ar trebui sa obtin 3215+*+7+
-    int val = calcul_expresie_f(s);
-    cout << val;
-    strcpy(s, "30 / 3 == 5 * 2");
-    if(valoare_adevar_expresie(s))
-    {
-        cout << "Adevarat";
-    }
-    else
-    {
-        cout << "True";
-    }
-    cout << "\n\n";
-    char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE];
-    int code_line_size;
-    output_code(code.first, code_text, code_line_size); ///code_text = char [][] si code_line_size = numarul de linii din code_text
-
-    val = calcul_expresie_f(code.allBlocks[4]->varFullExpression);
-    cout << val;
-
-    cout_to_binary_file();
-    */
     return 0;
 }

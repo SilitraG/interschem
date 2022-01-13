@@ -623,11 +623,6 @@ void updateUserInputString(char userChar) {
     }
     code.appProps.userInput.userInputText[activeField].setString(code.appProps.userInput.userInputString[activeField]);
 
-    ///TESTS
-    //char test[101];
-    //strcpy(test, code.appProps.userInput.userInputString[activeField].toAnsiString().c_str());
-    //cout <<test << ' ';
-
 }
 
 void updateAppOutput(int numberOfLines, char outputText[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]) {
@@ -670,27 +665,38 @@ void blockMenuButtonIsPressedHandler(int buttonId, sf::Font &textFont) {
 
 }
 
-void appOutputButtonIsPressedHandler(int buttonId) {
+void appOutputButtonIsPressedHandler(int buttonId, sf::Font &textFont) {
     if(buttonId == 1) { // Run Code Button
         int numberOfLines=0;
         char codeOutput[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]={NULL};
-        run_code(code.first, codeOutput, numberOfLines);
-        numberOfLines++;
-        strcpy(codeOutput[numberOfLines], " ");
-        numberOfLines++;
-        strcpy(codeOutput[numberOfLines], "");
-        numberOfLines++;
-        strcpy(codeOutput[numberOfLines], "USED VARIABLES: ");
-        numberOfLines++;
-        strcpy(codeOutput[numberOfLines], "");
-        varTester(numberOfLines, codeOutput);
-        updateAppOutput(numberOfLines, codeOutput);
+        int errorId = run_code(code.first, codeOutput, numberOfLines);
+
+        if(errorId != -1) {
+            int blockType = code.allBlocks[errorId]->typeId;
+            if(blockType == ASSIGN_BLOCK || blockType == INPUT_BLOCK) {
+                updateUserInputScreen(errorId, textFont);
+            } else if(blockType == DECISION_BLOCK) {
+                updateUserInputScreen(errorId, textFont);
+            }
+        } else {
+            numberOfLines++;
+            strcpy(codeOutput[numberOfLines], " ");
+            numberOfLines++;
+            strcpy(codeOutput[numberOfLines], "");
+            numberOfLines++;
+            strcpy(codeOutput[numberOfLines], "USED VARIABLES: ");
+            numberOfLines++;
+            strcpy(codeOutput[numberOfLines], "");
+            varTester(numberOfLines, codeOutput);
+            updateAppOutput(numberOfLines, codeOutput);
+        }
     } else { // Generate Code Button
         char code_text[MAX_NUMBER_OF_CODE_LINE][MAX_LINE_OF_CODE_SIZE]; ///indexat de la 1
         int code_line_size;
         output_code(code.first, code_text, code_line_size); ///codul ce urmeaza a fi afisat in interfata grafica se regaseste in code_text[][]
         updateAppOutput(code_line_size, code_text);
     }
+
 }
 
 void userInputButtonIsPressedHandler(int buttonId) {
